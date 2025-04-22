@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c1f2bae7-a144-4b6a-b034-9a864c2124b9" name="Changes" comment="update" />
+    <list default="true" id="c1f2bae7-a144-4b6a-b034-9a864c2124b9" name="Changes" comment="update">
+      <change afterPath="$PROJECT_DIR$/backend/core/src/main/java/com/konnectnet/core/infrastructure/websocket/WebSocketConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/src/main/java/com/konnectnet/core/infrastructure/websocket/WebSocketEventListener.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,7 +41,7 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "feature/user-authentication",
     "last_opened_file_path": "/Users/nguyenquocbao/Documents/JAVA/JAVA WEB PROJECT/konnectnet-social-media",
     "settings.editor.selected.configurable": "editor.preferences.fonts.default"
   }
