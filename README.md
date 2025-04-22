@@ -26,5 +26,7 @@ Konnect is a social media backend API built using Java/Spring Boot. It provides 
 - Recommendation Engine
 - Hashtags & Trends
 - User Stories
+- Optimization for Large User Bases (Scalability, Load Balancing, Caching)
+
 
   
