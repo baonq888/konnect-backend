@@ -14,5 +14,15 @@ spring:
   redis:
     host: localhost
     port: 6379
-
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 910508833594-ko7lnpm5rvir8sh8q9es0sgbu53blrla.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - profile
+              - email
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
 

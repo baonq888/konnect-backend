@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -29,11 +30,12 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        AppUser user = userRepository.findByEmail(email);
-        if (user == null) {
+        Optional<AppUser> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
             log.error("user not found");
             throw new UsernameNotFoundException("user not found");
         }
+        AppUser user = userOptional.get();
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         user.getRoles().forEach(role -> {
             authorities.add(new SimpleGrantedAuthority(role.getName()));
@@ -60,7 +62,12 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
     @Override
     public AppUser getUser(String email) {
-        return userRepository.findByEmail(email);
+        Optional<AppUser> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            log.error("User not found");
+            throw new UsernameNotFoundException("user not found");
+        }
+        return userOptional.get();
     }
 
 
