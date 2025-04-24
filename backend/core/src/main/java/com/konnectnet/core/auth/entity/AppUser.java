@@ -1,5 +1,6 @@
 package com.konnectnet.core.auth.entity;
 
+import com.konnectnet.core.auth.enums.AuthProvider;
 import jakarta.persistence.Entity;
 
 import jakarta.persistence.*;
@@ -17,13 +18,20 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AppUser {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
+
     private String name;
     private String email;
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider = AuthProvider.LOCAL;
+
+    private String providerId;
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Role> roles = new ArrayList<>();
@@ -40,6 +48,4 @@ public class AppUser {
         this.password = password;
         this.roles = roles;
     }
-
-
 }

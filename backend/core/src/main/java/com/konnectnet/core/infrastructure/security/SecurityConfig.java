@@ -1,6 +1,9 @@
 package com.konnectnet.core.infrastructure.security;
 
+import com.konnectnet.core.auth.service.CustomOAuth2Service;
 import com.konnectnet.core.infrastructure.security.filter.CustomAuthenticationFilter;
+import com.konnectnet.core.infrastructure.security.jwt.JwtProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,8 +12,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
-import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,16 +20,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final AuthenticationConfiguration authenticationConfiguration;
-
-    public SecurityConfig(UserDetailsService userDetailsService, BCryptPasswordEncoder passwordEncoder, AuthenticationConfiguration authenticationConfiguration) {
-        this.userDetailsService = userDetailsService;
-        this.bCryptPasswordEncoder = passwordEncoder;
-        this.authenticationConfiguration = authenticationConfiguration;
-    }
+    private final CustomOAuth2Service customOAuth2Service;
 
     @Bean
     public AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
@@ -39,7 +36,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager());
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager(), jwtProvider());
         customAuthenticationFilter.setFilterProcessesUrl("/api/v1/auth/login");
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -51,16 +48,26 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilter(customAuthenticationFilter)
-                .httpBasic(withDefaults());
+                .httpBasic(withDefaults())
+                .oauth2Login(oauth2Login -> oauth2Login
+                        .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
+                                .userService(customOAuth2Service)
+                        )
+                );
+
 
         return http.build();
     }
 
 
-
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public JwtProvider jwtProvider() {
+        return new JwtProvider();
     }
 
 
