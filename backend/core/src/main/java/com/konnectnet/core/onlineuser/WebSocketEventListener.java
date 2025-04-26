@@ -20,16 +20,28 @@ public class WebSocketEventListener {
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         if (event.getUser() != null) {
             String email = event.getUser().getName();
+            System.out.println("--- WebSocket Session Connected for user: " + email + " ---");
+
             onlineUserService.addUser(email);
-            // Broadcast that the user is online to all clients
-            messagingTemplate.convertAndSend(
-                    "/topic/online", new UserStatus(email, true)
-            );
-            // Send a list of online users to the newly connected user
-            Set<String> onlineUsers = onlineUserService.getOnlineUsers();
-            messagingTemplate.convertAndSendToUser(
-                    email, "/queue/online-users", onlineUsers
-            );
+            System.out.println("--- Added user '" + email + "' to online list ---");
+
+            // Broadcast user status (useful for other clients, not directly tested here)
+            // messagingTemplate.convertAndSend("/topic/online", new UserStatus(email, true));
+
+//            System.out.println("--- Attempting to get online users list ---");
+//            Set<String> onlineUsers = onlineUserService.getOnlineUsers();
+//            System.out.println("--- Retrieved online users list. Size: " + (onlineUsers != null ? onlineUsers.size() : "null") + ". Content: " + onlineUsers + " ---");
+//
+//            if (onlineUsers != null) {
+//                String userQueueDestination = "/queue/online-users";
+//                System.out.println("--- Sending initial online users list to user: " + email + " on destination: " + userQueueDestination + " ---");
+//                messagingTemplate.convertAndSendToUser(email, userQueueDestination, onlineUsers);
+//                System.out.println("--- Initial online users list message sent ---");
+//            } else {
+//                System.err.println("--- Online users list was null, not sending message. ---");
+//            }
+        } else {
+            System.out.println("--- WebSocket Session Connected, but user principal is null. ---");
         }
     }
 

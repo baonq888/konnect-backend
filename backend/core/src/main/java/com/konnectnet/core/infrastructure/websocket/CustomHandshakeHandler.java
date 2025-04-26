@@ -32,31 +32,30 @@ public class CustomHandshakeHandler extends DefaultHandshakeHandler {
 
         if (email != null) {
 
-            List<GrantedAuthority> authorities = getUserAuthorities(email, token);
+            List<GrantedAuthority> authorities = getUserAuthorities(token);
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+
+            return new UsernamePasswordAuthenticationToken(
                     email,
                     null,
                     authorities
             );
-
-            authentication.setAuthenticated(true);
-
-            return authentication;
         }
 
 
         return null;
     }
 
-    private List<GrantedAuthority> getUserAuthorities(String email, String token) {
-        Claims claims = jwtUtil.extractAllClaims(token);
-        String username = claims.getSubject();
-        List<String> roles = jwtUtil.extractRoles(token);
+    private List<GrantedAuthority> getUserAuthorities(String token) {
+        try {
+            List<String> roles = jwtUtil.extractRoles(token);
 
-        List<GrantedAuthority> authorities = roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .collect(Collectors.toList());
-        return Collections.emptyList();
+            return roles.stream()
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error extracting roles or creating authorities from token: " + e.getMessage());
+            return Collections.emptyList();
+        }
     }
 }
