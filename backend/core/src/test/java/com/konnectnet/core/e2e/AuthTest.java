@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AuthTest {
 
-    private static final String BASE_URL = "http://localhost:8222/api/v1/auth";
+    private static final String BASE_URL = "http://localhost:8050/api/v1/auth";
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
@@ -32,36 +32,18 @@ public class AuthTest {
             new User("User Two", "user2@example.com", "123"),
             new User("User Three", "user3@example.com", "123")
     );
-    private static final OAuthUser GOOGLE_USER = new OAuthUser("qbhoalu@gmail.com");
 
     @Test
     @Order(1)
-    void testGoogleLogin() throws JsonProcessingException {
-        // Prepare OAuth2 login payload (No password here for OAuth2)
-        Map<String, String> loginPayload = new HashMap<>();
-        loginPayload.put("email", GOOGLE_USER.email);
-
-        String jsonBody = objectMapper.writeValueAsString(loginPayload);
-
-        // Call the login endpoint which triggers Google OAuth2 flow
-        var response =
-                given()
-                        .contentType(ContentType.JSON)
-                        .body(jsonBody)
-                        .when()
-                        .post("/login/google")
-                        .then()
-                        .statusCode(200)
-                        .body("access_token", notNullValue())
-                        .body("refresh_token", notNullValue())
-                        .extract()
-                        .response();
-
-        String accessToken = response.jsonPath().getString("access_token");
-        String refreshToken = response.jsonPath().getString("refresh_token");
-
-        TokenContext.add( GOOGLE_USER.email + "_" + "access_token", accessToken);
-        TokenContext.add(GOOGLE_USER.email + "_" +"refresh_token", refreshToken);
+    void testGoogleLoginRedirect() {
+        given()
+                .baseUri("http://localhost:8050") // override only for this test
+                .redirects().follow(false)
+                .when()
+                .get("/oauth2/authorization/google")
+                .then()
+                .statusCode(302)
+                .header("Location", containsString("accounts.google.com"));
     }
 
 

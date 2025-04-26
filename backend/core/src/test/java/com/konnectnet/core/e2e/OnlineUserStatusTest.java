@@ -3,17 +3,23 @@ package com.konnectnet.core.e2e;
 import com.konnectnet.core.e2e.utils.TokenContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
+import org.springframework.web.socket.sockjs.client.SockJsClient;
+import org.springframework.web.socket.sockjs.client.Transport;
+import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
 import java.util.Set;
@@ -22,28 +28,32 @@ import java.util.concurrent.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OnlineUserStatusTest {
-    @Value("${server.port}")
-    private int port;
 
     private String WS_URL;
 
     @BeforeEach
     void init() {
-        WS_URL = "ws://localhost:" + port + "/ws";
+        WS_URL = "ws://localhost:8050/ws";
     }
 
     private static final String TEST_USER = "user1@example.com";
 
     @Test
     void testOnlineUserBroadcastAfterLogin() throws Exception {
-        String accessToken = TokenContext.get("access_token");
+        String accessToken = TokenContext.get(TEST_USER + "_" + "access_token");
 
-        WebSocketStompClient stompClient = new WebSocketStompClient(new StandardWebSocketClient());
-        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+//        WebSocketStompClient stompClient = new WebSocketStompClient(new StandardWebSocketClient());
+//        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+        List<Transport> transports = new ArrayList<>();
+        transports.add(new WebSocketTransport(new StandardWebSocketClient()));
+        WebSocketClient transport = new SockJsClient(transports);
+        WebSocketStompClient stompClient = new WebSocketStompClient(transport);
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+        headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+
         StompHeaders connectHeaders = new StompHeaders();
-        connectHeaders.add("Authorization", "Bearer " + accessToken);
+        connectHeaders.add("username", TEST_USER);
 
         CompletableFuture<Set<String>> onlineUsersFuture = new CompletableFuture<>();
 

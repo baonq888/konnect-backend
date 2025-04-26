@@ -6,4 +6,5 @@ import com.konnectnet.core.auth.entity.AppUser;
 public interface AuthService {
     AppUser saveUser(RegisterRequest request);
     AppUser getUser(String email);
+    void saveRole(String roleName);
 }
