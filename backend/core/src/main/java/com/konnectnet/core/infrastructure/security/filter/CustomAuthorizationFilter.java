@@ -41,13 +41,12 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        if (jwtUtil.validateToken(token)) {
+        if (jwtUtil.isTokenValid(token)) {
             try {
-                Claims claims = jwtUtil.extractAllClaims(token);
-                String username = claims.getSubject();
-                List<String> roles = jwtUtil.extractRoles(token); // Assuming roles are stored as a list in JWT
 
-                // Convert roles into Spring Security authorities
+                String username = jwtUtil.extractUsername(token);
+                List<String> roles = jwtUtil.extractRoles(token);
+
                 List<GrantedAuthority> authorities = roles.stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                         .collect(Collectors.toList());

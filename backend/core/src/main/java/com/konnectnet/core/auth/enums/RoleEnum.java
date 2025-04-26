@@ -1,6 +1,6 @@
 package com.konnectnet.core.auth.enums;
 
-public enum Role {
+public enum RoleEnum {
     USER,
     GROUP_ADMIN,
     GROUP_MEMBER

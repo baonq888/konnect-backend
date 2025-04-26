@@ -1,52 +1,59 @@
 package com.konnectnet.core.infrastructure.security.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.JWTVerifier;
+import com.konnectnet.core.infrastructure.security.enums.JwtSecret;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
+import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private static final String SECRET_KEY = "secret";
+    private static final String SECRET_KEY = JwtSecret.SECRET_KEY.getKey();
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+    private Algorithm getAlgorithm() {
+        return Algorithm.HMAC256(SECRET_KEY.getBytes());
     }
 
+    private DecodedJWT decodeToken(String token) {
+        logger.info(SECRET_KEY);
+        JWTVerifier verifier = JWT.require(getAlgorithm()).build();
+        return verifier.verify(token);
+    }
+
+    public String extractUsername(String token) {
+        return decodeToken(token).getSubject();
+    }
 
     public List<String> extractRoles(String token) {
-        return extractClaim(token, claims -> (List<String>) claims.get("roles"));
+        return decodeToken(token).getClaim("roles").asList(String.class);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
+    public boolean isTokenValid(String token) {
 
-    public Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
-
-    public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                    .verifyWith(getSigningKey())
-                    .build()
-                    .parseSignedClaims(token);
+            decodeToken(token);
             return true;
-        } catch (JwtException e) {
+        } catch (Exception e) {
             return false;
         }
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            DecodedJWT decodedJWT = decodeToken(token);
+            return decodedJWT.getExpiresAt().before(new Date());
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    public Date getTokenExpiration(String token) {
+        return decodeToken(token).getExpiresAt();
     }
 }

@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum JwtSecret {
 
-    SECRET_KEY("YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo0NTY3ODkwMTIzNDU2Nzg5MA==");
+    SECRET_KEY("YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo0NTY3ODkwMTIzNDU2Nzg5MA");
 
     private final String key;
 

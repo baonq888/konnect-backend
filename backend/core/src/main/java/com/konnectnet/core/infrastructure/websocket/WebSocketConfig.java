@@ -27,6 +27,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
+                .setAllowedOrigins("*")
                 .addInterceptors(jwtHandshakeInterceptor) // Intercept and authenticate JWT
                 .setHandshakeHandler(customHandshakeHandler)
                 .withSockJS(); // Enable SockJS fallback
