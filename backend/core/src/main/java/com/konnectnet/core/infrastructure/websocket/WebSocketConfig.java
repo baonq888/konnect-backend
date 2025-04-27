@@ -29,7 +29,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws")
                 .setAllowedOrigins("*")
                 .addInterceptors(jwtHandshakeInterceptor) // Intercept and authenticate JWT
-                .setHandshakeHandler(customHandshakeHandler)
-                .withSockJS(); // Enable SockJS fallback
+                .setHandshakeHandler(customHandshakeHandler);
+                //.withSockJS(); // Enable SockJS fallback
     }
 }

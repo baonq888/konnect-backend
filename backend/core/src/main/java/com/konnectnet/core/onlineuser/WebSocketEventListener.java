@@ -3,10 +3,13 @@ package com.konnectnet.core.onlineuser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
+import java.security.Principal;
 import java.util.Set;
 
 
@@ -21,15 +24,25 @@ public class WebSocketEventListener {
         if (event.getUser() != null) {
             String email = event.getUser().getName();
             onlineUserService.addUser(email);
-            // Broadcast that the user is online to all clients
-            messagingTemplate.convertAndSend(
-                    "/topic/online", new UserStatus(email, true)
-            );
-            // Send a list of online users to the newly connected user
+        }
+    }
+
+    @EventListener
+    public void handleWebSocketSubscribeListener(SessionSubscribeEvent event) {
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        String destination = headerAccessor.getDestination();
+        Principal principal = event.getUser();
+
+        // Check if the subscription is for the online users queue and user is authenticated
+        if (principal != null && "/user/queue/online-users".equals(destination)) {
+            String email = principal.getName();
+
             Set<String> onlineUsers = onlineUserService.getOnlineUsers();
-            messagingTemplate.convertAndSendToUser(
-                    email, "/queue/online-users", onlineUsers
-            );
+
+            if (onlineUsers != null) {
+                String userQueueDestination = "/queue/online-users";
+                messagingTemplate.convertAndSendToUser(email, userQueueDestination, onlineUsers);
+            }
         }
     }
 

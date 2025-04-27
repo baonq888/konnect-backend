@@ -25,4 +25,9 @@ spring:
               - profile
               - email
             redirect-uri: "{baseUrl}/login/oauth2/code/google"
+logging:
+  level:
+    org.springframework.security.messaging: DEBUG
+    org.springframework.web.socket.messaging: DEBUG
+    org.springframework.messaging.simp: DEBUG
 

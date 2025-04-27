@@ -2,7 +2,6 @@ package com.konnectnet.core.infrastructure.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.konnectnet.core.infrastructure.security.jwt.JwtUtil;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
