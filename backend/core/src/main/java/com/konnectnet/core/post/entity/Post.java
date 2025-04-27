@@ -40,5 +40,9 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Photo> photos = new ArrayList<>();
 
+    public Post(String content, Visibility visibility) {
+        this.content = content;
+        this.visibility = visibility;
+    }
 
 }

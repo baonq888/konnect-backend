@@ -8,6 +8,7 @@ import com.konnectnet.core.auth.repository.RoleRepository;
 import com.konnectnet.core.auth.repository.UserRepository;
 import com.konnectnet.core.auth.service.AuthService;
 import com.konnectnet.core.user.entity.UserDetail;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -50,6 +51,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public AppUser saveUser(RegisterRequest request) {
         AppUser user = new AppUser(request.getName(), request.getEmail(), request.getPassword());
         Role userRole = roleRepository.findByName(RoleEnum.USER.name())

@@ -18,10 +18,12 @@ public class Photo {
     private UUID id;
 
     private String url;
-    private String caption;
-    private String altText;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
+
+    public Photo(String url) {
+        this.url = url;
+    }
 }
