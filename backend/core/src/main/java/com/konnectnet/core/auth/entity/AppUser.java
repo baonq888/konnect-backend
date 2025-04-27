@@ -1,6 +1,7 @@
 package com.konnectnet.core.auth.entity;
 
 import com.konnectnet.core.auth.enums.AuthProvider;
+import com.konnectnet.core.user.entity.UserDetail;
 import jakarta.persistence.Entity;
 
 import jakarta.persistence.*;
@@ -36,6 +37,12 @@ public class AppUser {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Role> roles = new ArrayList<>();
+
+    @OneToOne(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private UserDetail userDetail;
 
     public AppUser(String name, String email, String password) {
         this.name = name;

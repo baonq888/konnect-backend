@@ -7,6 +7,7 @@ import com.konnectnet.core.auth.enums.RoleEnum;
 import com.konnectnet.core.auth.repository.RoleRepository;
 import com.konnectnet.core.auth.repository.UserRepository;
 import com.konnectnet.core.auth.service.AuthService;
+import com.konnectnet.core.user.entity.UserDetail;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -55,6 +56,10 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
                 .orElseThrow(() -> new RuntimeException("Role not found"));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(Set.of(userRole));
+
+        UserDetail userDetail = new UserDetail();
+        userDetail.setUser(user);
+        user.setUserDetail(userDetail);
 
         return userRepository.save(user);
     }
