@@ -3,10 +3,13 @@ package com.konnectnet.core.onlineuser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
+import java.security.Principal;
 import java.util.Set;
 
 
@@ -20,28 +23,26 @@ public class WebSocketEventListener {
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         if (event.getUser() != null) {
             String email = event.getUser().getName();
-            System.out.println("--- WebSocket Session Connected for user: " + email + " ---");
-
             onlineUserService.addUser(email);
-            System.out.println("--- Added user '" + email + "' to online list ---");
+        }
+    }
 
-            // Broadcast user status (useful for other clients, not directly tested here)
-            // messagingTemplate.convertAndSend("/topic/online", new UserStatus(email, true));
+    @EventListener
+    public void handleWebSocketSubscribeListener(SessionSubscribeEvent event) {
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        String destination = headerAccessor.getDestination();
+        Principal principal = event.getUser();
 
-//            System.out.println("--- Attempting to get online users list ---");
-//            Set<String> onlineUsers = onlineUserService.getOnlineUsers();
-//            System.out.println("--- Retrieved online users list. Size: " + (onlineUsers != null ? onlineUsers.size() : "null") + ". Content: " + onlineUsers + " ---");
-//
-//            if (onlineUsers != null) {
-//                String userQueueDestination = "/queue/online-users";
-//                System.out.println("--- Sending initial online users list to user: " + email + " on destination: " + userQueueDestination + " ---");
-//                messagingTemplate.convertAndSendToUser(email, userQueueDestination, onlineUsers);
-//                System.out.println("--- Initial online users list message sent ---");
-//            } else {
-//                System.err.println("--- Online users list was null, not sending message. ---");
-//            }
-        } else {
-            System.out.println("--- WebSocket Session Connected, but user principal is null. ---");
+        // Check if the subscription is for the online users queue and user is authenticated
+        if (principal != null && "/user/queue/online-users".equals(destination)) {
+            String email = principal.getName();
+
+            Set<String> onlineUsers = onlineUserService.getOnlineUsers();
+
+            if (onlineUsers != null) {
+                String userQueueDestination = "/queue/online-users";
+                messagingTemplate.convertAndSendToUser(email, userQueueDestination, onlineUsers);
+            }
         }
     }
 
