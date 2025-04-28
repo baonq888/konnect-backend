@@ -2,6 +2,7 @@ package com.konnectnet.core;
 
 import com.konnectnet.core.auth.enums.RoleEnum;
 import com.konnectnet.core.auth.service.AuthService;
+import com.konnectnet.core.infrastructure.config.LuceneConfig;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,11 +18,13 @@ public class CoreApplication {
 	}
 
 	@Bean
-	CommandLineRunner run(AuthService authService) {
+	CommandLineRunner run(AuthService authService, LuceneConfig luceneConfig) {
 		return args -> {
 			authService.saveRole(RoleEnum.USER.name());
 			authService.saveRole(RoleEnum.GROUP_ADMIN.name());
 			authService.saveRole(RoleEnum.GROUP_MEMBER.name());
+
+			System.out.println(luceneConfig.getDir());
 		};
 	}
 }
