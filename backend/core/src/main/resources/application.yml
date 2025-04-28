@@ -31,3 +31,8 @@ logging:
     org.springframework.web.socket.messaging: DEBUG
     org.springframework.messaging.simp: DEBUG
 
+search:
+  engine: lucene
+  lucene:
+    dir: ../lucene-index
+
