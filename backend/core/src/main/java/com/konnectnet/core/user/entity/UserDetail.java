@@ -20,7 +20,6 @@ public class UserDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
     private String bio;
     private String profilePictureUrl;
 

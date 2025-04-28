@@ -2,11 +2,16 @@ package com.konnectnet.core.post.service;
 
 import com.konnectnet.core.post.dto.request.PostRequest;
 import com.konnectnet.core.post.entity.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.io.IOException;
 
 public interface PostService {
     Post createPost(PostRequest request);
     Post getPostById(String postId);
+    Page<Post> searchPosts(String searchTerm, Pageable pageable) throws IOException;
     Post updatePost(String postId, PostRequest request);
     void deletePost(String postId);
+
 }

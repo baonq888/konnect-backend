@@ -1,5 +1,6 @@
 package com.konnectnet.core.post.entity;
 
+import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.post.enums.Visibility;
 import com.konnectnet.core.user.entity.UserDetail;
 import jakarta.persistence.*;
@@ -34,8 +35,8 @@ public class Post {
     private Visibility visibility = Visibility.PUBLIC;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_detail_id")
-    private UserDetail userDetail;
+    @JoinColumn(name = "user_id")
+    private AppUser user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Photo> photos = new ArrayList<>();

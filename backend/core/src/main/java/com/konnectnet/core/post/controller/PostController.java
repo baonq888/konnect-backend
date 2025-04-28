@@ -12,11 +12,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -68,6 +73,33 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.OK).body(post);
         } catch (PostException e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(
+            summary = "Search for posts",
+            description = "Search for posts based on a search term"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Search results returned",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Post.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Invalid search term")
+    })
+    @GetMapping
+    public ResponseEntity<Page<Post>> searchPosts(
+            @Parameter(description = "Search term for post content") @RequestParam String searchTerm,
+            @Parameter(description = "Current page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int limit) {
+
+        Pageable pageable = PageRequest.of(page, limit);
+        try {
+            Page<Post> posts = postService.searchPosts(searchTerm, pageable);
+            return ResponseEntity.status(HttpStatus.OK).body(posts);
+        } catch (IOException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
 

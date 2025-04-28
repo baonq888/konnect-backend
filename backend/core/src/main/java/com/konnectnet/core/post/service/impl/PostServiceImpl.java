@@ -7,12 +7,19 @@ import com.konnectnet.core.post.enums.Visibility;
 import com.konnectnet.core.post.exception.PostException;
 import com.konnectnet.core.post.repository.PostRepository;
 import com.konnectnet.core.post.service.PostService;
+import com.konnectnet.core.search.LuceneSearchService;
+import com.konnectnet.core.search.document.DocumentInfo;
+import com.konnectnet.core.search.document.SearchResult;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +29,7 @@ import java.util.UUID;
 @Slf4j
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
+    private final LuceneSearchService luceneSearchService;
 
     @Override
     @Transactional
@@ -37,7 +45,16 @@ public class PostServiceImpl implements PostService {
             }
             post.setPhotos(photoList);
 
-            return postRepository.save(post);
+            Post savedPost = postRepository.save(post);
+
+            // Index Post document to Lucence
+            DocumentInfo documentInfo = new DocumentInfo(
+                    savedPost.getId().toString(),
+                    savedPost.getContent(),
+                    savedPost.getUser().getName()
+            );
+
+            return savedPost;
         } catch (IllegalArgumentException e) {
             log.error("Validation error: {}", e.getMessage(), e);
             throw new PostException(e.getMessage(), e);
@@ -61,6 +78,22 @@ public class PostServiceImpl implements PostService {
             log.error("Error while fetching post {}: {}", postId, e.getMessage(), e);
             throw new PostException("Failed to retrieve post", e);
         }
+    }
+
+    @Override
+    public Page<Post> searchPosts(String searchTerm, Pageable pageable) throws IOException {
+        // Perform Lucene search
+        List<SearchResult> searchResults = luceneSearchService.search(searchTerm, pageable.getPageNumber(), pageable.getPageSize());
+
+        // Convert SearchResults to Post
+        List<Post> posts = new ArrayList<>();
+        for (SearchResult result : searchResults) {
+            Post post = postRepository.findById(result.getPostId())
+                    .orElseThrow(() -> new PostException("Post not found for search result"));
+            posts.add(post);
+        }
+
+        return new PageImpl<>(posts, pageable, searchResults.size());
     }
 
     @Override
