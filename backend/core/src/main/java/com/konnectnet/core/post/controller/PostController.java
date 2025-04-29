@@ -1,6 +1,7 @@
 package com.konnectnet.core.post.controller;
 
 import com.konnectnet.core.post.dto.request.PostRequest;
+import com.konnectnet.core.post.entity.Comment;
 import com.konnectnet.core.post.entity.Post;
 import com.konnectnet.core.post.service.PostService;
 import com.konnectnet.core.post.exception.PostException;
@@ -226,6 +227,69 @@ public class PostController {
             return ResponseEntity.ok("Shared post removed successfully");
         } catch (PostException e) {
             return new ResponseEntity<>("Failed to unshare post", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(
+            summary = "Comment on a post",
+            description = "Adds a comment to a post by a specific user"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Comment added successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),
+            @ApiResponse(responseCode = "404", description = "Post or user not found")
+    })
+    @PostMapping("/{postId}/comment")
+    public ResponseEntity<Comment> commentOnPost(
+            @PathVariable String postId,
+            @RequestParam String userId,
+            @RequestBody String text) {
+        try {
+            Comment comment = postService.commentOnPost(postId, userId, text);
+            return ResponseEntity.status(HttpStatus.CREATED).body(comment);
+        } catch (PostException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(
+            summary = "Like a comment",
+            description = "Likes a specific comment by a user"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Comment liked successfully"),
+            @ApiResponse(responseCode = "404", description = "Comment or user not found")
+    })
+    @PostMapping("/comments/{commentId}/like")
+    public ResponseEntity<String> likeComment(
+            @PathVariable String commentId,
+            @RequestParam String userId) {
+        try {
+            postService.likeComment(commentId, userId);
+            return ResponseEntity.ok("Comment liked successfully");
+        } catch (PostException e) {
+            return new ResponseEntity<>("Failed to like comment", HttpStatus.NOT_FOUND);
+        }
+
+    }
+
+    @Operation(
+            summary = "Unlike a comment",
+            description = "Removes a like from a comment by a user"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Comment unliked successfully"),
+            @ApiResponse(responseCode = "404", description = "Comment or user not found")
+    })
+    @PostMapping("/comments/{commentId}/unlike")
+    public ResponseEntity<String> unlikeComment(
+            @PathVariable String commentId,
+            @RequestParam String userId) {
+        try {
+            postService.unlikeComment(commentId, userId);
+            return ResponseEntity.ok("Comment unliked successfully");
+        } catch (PostException e) {
+            return new ResponseEntity<>("Failed to unlike comment", HttpStatus.NOT_FOUND);
         }
     }
 }

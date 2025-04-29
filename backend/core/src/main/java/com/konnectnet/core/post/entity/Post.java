@@ -2,7 +2,6 @@ package com.konnectnet.core.post.entity;
 
 import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.post.enums.Visibility;
-import com.konnectnet.core.user.entity.UserDetail;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,6 +47,9 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<AppUser> likedUsers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     // Shared Post is a Reference to the Original Post
     @ManyToOne(fetch = FetchType.LAZY)

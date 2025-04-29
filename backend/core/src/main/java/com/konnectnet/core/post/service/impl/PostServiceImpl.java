@@ -3,10 +3,12 @@ package com.konnectnet.core.post.service.impl;
 import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.auth.repository.UserRepository;
 import com.konnectnet.core.post.dto.request.PostRequest;
+import com.konnectnet.core.post.entity.Comment;
 import com.konnectnet.core.post.entity.Photo;
 import com.konnectnet.core.post.entity.Post;
 import com.konnectnet.core.post.enums.Visibility;
 import com.konnectnet.core.post.exception.PostException;
+import com.konnectnet.core.post.repository.CommentRepository;
 import com.konnectnet.core.post.repository.PostRepository;
 import com.konnectnet.core.post.service.PostService;
 import com.konnectnet.core.search.LuceneSearchService;
@@ -32,6 +34,7 @@ import java.util.UUID;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
     private final LuceneSearchService luceneSearchService;
 
     @Override
@@ -236,5 +239,59 @@ public class PostServiceImpl implements PostService {
             throw new PostException("Failed to unshare post", e);
         }
 
+    }
+
+    @Override
+    public Comment commentOnPost(String postId, String userId, String text) {
+        try {
+            Post post = postRepository.findById(UUID.fromString(postId))
+                    .orElseThrow(() -> new RuntimeException("Post not found"));
+
+            AppUser user = userRepository.findById(UUID.fromString(userId))
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            Comment comment = new Comment(text, post, user);
+            return commentRepository.save(comment);
+        } catch (Exception e) {
+            log.error("Error occurred while commenting on post {}: {}", postId, e.getMessage(), e);
+            throw new PostException("Failed to comment on post", e);
+        }
+    }
+
+    @Override
+    public void likeComment(String commentId, String userId) {
+        try {
+            Comment comment = commentRepository.findById(UUID.fromString(commentId))
+                    .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+            AppUser user = userRepository.findById(UUID.fromString(userId))
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (!comment.getLikedUsers().contains(user)) {
+                comment.getLikedUsers().add(user);
+                commentRepository.save(comment);
+            }
+        } catch (Exception e) {
+            log.error("Error occurred while liking comment {}: {}", commentId, e.getMessage(), e);
+            throw new PostException("Failed to like comment", e);
+        }
+    }
+
+    @Override
+    public void unlikeComment(String commentId, String userId) {
+        try {
+            Comment comment = commentRepository.findById(UUID.fromString(commentId))
+                    .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+            AppUser user = userRepository.findById(UUID.fromString(userId))
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (comment.getLikedUsers().remove(user)) {
+                commentRepository.save(comment);
+            }
+        } catch (Exception e) {
+            log.error("Error occurred while unliking comment {}: {}", commentId, e.getMessage(), e);
+            throw new PostException("Failed to unlike comment", e);
+        }
     }
 }
