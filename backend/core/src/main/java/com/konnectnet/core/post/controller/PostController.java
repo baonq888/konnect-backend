@@ -149,4 +149,83 @@ public class PostController {
             return new ResponseEntity<>("Failed to delete post", HttpStatus.NOT_FOUND);
         }
     }
+
+    @Operation(
+            summary = "Like a post",
+            description = "Likes the specified post by a user"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Post liked successfully"),
+            @ApiResponse(responseCode = "404", description = "Post or user not found")
+    })
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<String> likePost(
+            @PathVariable String postId,
+            @RequestParam String userId) {
+        try {
+            postService.likePost(postId, userId);
+            return ResponseEntity.ok("Post liked successfully");
+        } catch (PostException e) {
+            return new ResponseEntity<>("Failed to like post", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(
+            summary = "Unlike a post",
+            description = "Unlikes the specified post by a user"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Post unliked successfully"),
+            @ApiResponse(responseCode = "404", description = "Post or user not found")
+    })
+    @PostMapping("/{postId}/unlike")
+    public ResponseEntity<String> unlikePost(
+            @PathVariable String postId,
+            @RequestParam String userId) {
+        try {
+            postService.unlikePost(postId, userId);
+            return ResponseEntity.ok("Post unliked successfully");
+        } catch (PostException e) {
+            return new ResponseEntity<>("Failed to unlike post", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(
+            summary = "Share a post",
+            description = "Shares an existing post with optional user content"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Post shared successfully"),
+            @ApiResponse(responseCode = "404", description = "Original post or user not found")
+    })
+    @PostMapping("/{postId}/share")
+    public ResponseEntity<Post> sharePost(
+            @PathVariable String postId,
+            @RequestParam String userId,
+            @RequestBody(required = false) String content) {
+        try {
+            Post sharedPost = postService.sharePost(postId, userId, content);
+            return ResponseEntity.status(HttpStatus.CREATED).body(sharedPost);
+        } catch (PostException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(
+            summary = "Unshare a shared post",
+            description = "Deletes a post that was shared by a user"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Shared post removed successfully"),
+            @ApiResponse(responseCode = "404", description = "Post not found or not a shared post")
+    })
+    @DeleteMapping("/{postId}/unshare")
+    public ResponseEntity<String> unsharePost(@PathVariable String postId) {
+        try {
+            postService.unsharePost(postId);
+            return ResponseEntity.ok("Shared post removed successfully");
+        } catch (PostException e) {
+            return new ResponseEntity<>("Failed to unshare post", HttpStatus.NOT_FOUND);
+        }
+    }
 }

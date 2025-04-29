@@ -41,6 +41,23 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Photo> photos = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "post_likes",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<AppUser> likedUsers = new ArrayList<>();
+
+    // Shared Post is a Reference to the Original Post
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "original_post_id")
+    private Post originalPost;
+
+
+    @OneToMany(mappedBy = "originalPost", cascade = CascadeType.ALL)
+    private List<Post> sharedPosts = new ArrayList<>();
+
     public Post(String content, Visibility visibility) {
         this.content = content;
         this.visibility = visibility;

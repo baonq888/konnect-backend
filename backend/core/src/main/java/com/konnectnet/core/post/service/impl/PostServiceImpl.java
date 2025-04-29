@@ -1,5 +1,7 @@
 package com.konnectnet.core.post.service.impl;
 
+import com.konnectnet.core.auth.entity.AppUser;
+import com.konnectnet.core.auth.repository.UserRepository;
 import com.konnectnet.core.post.dto.request.PostRequest;
 import com.konnectnet.core.post.entity.Photo;
 import com.konnectnet.core.post.entity.Post;
@@ -29,6 +31,7 @@ import java.util.UUID;
 @Slf4j
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final LuceneSearchService luceneSearchService;
 
     @Override
@@ -71,9 +74,6 @@ public class PostServiceImpl implements PostService {
             UUID id = UUID.fromString(postId);
             return postRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Post not found with ID: " + postId));
-        } catch (EntityNotFoundException e) {
-            log.warn("Post not found with ID: {}", postId);
-            throw new PostException("Post not found with ID: " + postId, e);
         } catch (Exception e) {
             log.error("Error while fetching post {}: {}", postId, e.getMessage(), e);
             throw new PostException("Failed to retrieve post", e);
@@ -82,18 +82,23 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<Post> searchPosts(String searchTerm, Pageable pageable) throws IOException {
-        // Perform Lucene search
-        List<SearchResult> searchResults = luceneSearchService.search(searchTerm, pageable.getPageNumber(), pageable.getPageSize());
+        try {
+            // Perform Lucene search
+            List<SearchResult> searchResults = luceneSearchService.search(searchTerm, pageable.getPageNumber(), pageable.getPageSize());
 
-        // Convert SearchResults to Post
-        List<Post> posts = new ArrayList<>();
-        for (SearchResult result : searchResults) {
-            Post post = postRepository.findById(result.getPostId())
-                    .orElseThrow(() -> new PostException("Post not found for search result"));
-            posts.add(post);
+            // Convert SearchResults to Post
+            List<Post> posts = new ArrayList<>();
+            for (SearchResult result : searchResults) {
+                Post post = postRepository.findById(result.getPostId())
+                        .orElseThrow(() -> new PostException("Post not found for search result"));
+                posts.add(post);
+            }
+
+            return new PageImpl<>(posts, pageable, searchResults.size());
+        } catch (Exception e) {
+            log.error("Error while searching posts {}: {}", searchTerm, e.getMessage(), e);
+            throw new PostException("Failed to search posts", e);
         }
-
-        return new PageImpl<>(posts, pageable, searchResults.size());
     }
 
     @Override
@@ -151,12 +156,85 @@ public class PostServiceImpl implements PostService {
             postRepository.delete(post);
 
             log.info("Post with ID {} deleted successfully", postId);
-        } catch (EntityNotFoundException e) {
-            log.warn("Post not found with ID: {}", postId);
-            throw new PostException("Post not found with ID: " + postId, e);
         } catch (Exception e) {
             log.error("Error occurred while deleting post {}: {}", postId, e.getMessage(), e);
             throw new PostException("Failed to delete post", e);
         }
+    }
+
+    @Override
+    public void likePost(String postId, String userId) {
+        try {
+            Post post = postRepository.findById(UUID.fromString(postId))
+                    .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+
+            AppUser user = userRepository.findById(UUID.fromString(userId))
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+            if (!post.getLikedUsers().contains(user)) {
+                post.getLikedUsers().add(user);
+                postRepository.save(post);
+            }
+        } catch (Exception e) {
+            log.error("Error occurred while liking post {}: {}", postId, e.getMessage(), e);
+            throw new PostException("Failed to like post", e);
+        }
+    }
+
+    @Override
+    public void unlikePost(String postId, String userId) {
+        try {
+            Post post = postRepository.findById(UUID.fromString(postId))
+                    .orElseThrow(() -> new RuntimeException("Post not found"));
+
+            AppUser user = userRepository.findById(UUID.fromString(userId))
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (post.getLikedUsers().contains(user)) {
+                post.getLikedUsers().remove(user);
+                postRepository.save(post);
+            }
+        } catch (Exception e) {
+            log.error("Error occurred while unliking post {}: {}", postId, e.getMessage(), e);
+            throw new PostException("Failed to unlike post", e);
+        }
+
+    }
+
+    @Override
+    public Post sharePost(String postId, String userId, String userContent) {
+        try {
+            Post originalPost = postRepository.findById(UUID.fromString(postId))
+                    .orElseThrow(() -> new RuntimeException("Post not found"));
+
+            AppUser user = userRepository.findById(UUID.fromString(userId))
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            Post sharedPost = new Post();
+            sharedPost.setContent(userContent);
+            sharedPost.setUser(user);
+            sharedPost.setOriginalPost(originalPost);
+            sharedPost.setVisibility(originalPost.getVisibility());
+
+            return postRepository.save(sharedPost);
+        } catch (Exception e) {
+            log.error("Error occurred while sharing post {}: {}", postId, e.getMessage(), e);
+            throw new PostException("Failed to share post", e);
+        }
+
+    }
+
+    @Override
+    public void unsharePost(String sharedPostId) {
+        try {
+            Post sharedPost = postRepository.findById(UUID.fromString(sharedPostId))
+                    .orElseThrow(() -> new RuntimeException("Shared post not found"));
+
+            postRepository.delete(sharedPost);
+        }  catch (Exception e) {
+            log.error("Error occurred while unsharing post {}: {}", sharedPostId, e.getMessage(), e);
+            throw new PostException("Failed to unshare post", e);
+        }
+
     }
 }

@@ -44,6 +44,17 @@ public class AppUser {
             orphanRemoval = true, fetch = FetchType.LAZY)
     private UserDetail userDetail;
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_friends",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_id")
+    )
+    private Collection<AppUser> friends = new ArrayList<>();
+
+
+
+
     public AppUser(String name, String email, String password) {
         this.name = name;
         this.email = email;

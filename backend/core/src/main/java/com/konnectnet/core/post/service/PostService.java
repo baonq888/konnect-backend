@@ -13,5 +13,8 @@ public interface PostService {
     Page<Post> searchPosts(String searchTerm, Pageable pageable) throws IOException;
     Post updatePost(String postId, PostRequest request);
     void deletePost(String postId);
-
+    void likePost(String postId, String userId);
+    void unlikePost(String postId, String userId);
+    Post sharePost(String postId, String userId, String userContent);
+    void unsharePost(String sharedPostId);
 }
