@@ -12,7 +12,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler {
+public class PostExceptionHandler {
 
     @ExceptionHandler(PostException.class)
     public ResponseEntity<String> handlePostException(PostException e) {

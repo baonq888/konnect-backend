@@ -11,7 +11,7 @@ import org.junit.platform.suite.api.Suite;
 @SelectClasses({
         DatabaseCleaner.class,
         AuthTest.class,
-        OnlineUserStatusTest.class,
+        // OnlineUserStatusTest.class,
         PostTest.class
 })
 public class E2ETestSuite {

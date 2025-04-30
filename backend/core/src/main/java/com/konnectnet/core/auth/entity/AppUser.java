@@ -1,5 +1,6 @@
 package com.konnectnet.core.auth.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.konnectnet.core.auth.enums.AuthProvider;
 import com.konnectnet.core.user.entity.UserDetail;
 import jakarta.persistence.Entity;
@@ -42,6 +43,7 @@ public class AppUser {
             mappedBy = "user",
             cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private UserDetail userDetail;
 
     @ManyToMany
@@ -51,8 +53,6 @@ public class AppUser {
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
     private Collection<AppUser> friends = new ArrayList<>();
-
-
 
 
     public AppUser(String name, String email, String password) {

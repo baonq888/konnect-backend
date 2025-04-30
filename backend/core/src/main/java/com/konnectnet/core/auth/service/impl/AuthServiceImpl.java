@@ -1,9 +1,11 @@
 package com.konnectnet.core.auth.service.impl;
 
 import com.konnectnet.core.auth.dto.request.RegisterRequest;
+import com.konnectnet.core.auth.dto.response.AppUserDTO;
 import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.auth.entity.Role;
 import com.konnectnet.core.auth.enums.RoleEnum;
+import com.konnectnet.core.auth.mapper.AppUserMapper;
 import com.konnectnet.core.auth.repository.RoleRepository;
 import com.konnectnet.core.auth.repository.UserRepository;
 import com.konnectnet.core.auth.service.AuthService;
@@ -29,6 +31,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AppUserMapper appUserMapper;
 
 
     @Override
@@ -52,7 +55,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
     @Override
     @Transactional
-    public AppUser saveUser(RegisterRequest request) {
+    public AppUserDTO saveUser(RegisterRequest request) {
         AppUser user = new AppUser(request.getName(), request.getEmail(), request.getPassword());
         Role userRole = roleRepository.findByName(RoleEnum.USER.name())
                 .orElseThrow(() -> new RuntimeException("Role not found"));
@@ -63,7 +66,8 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         userDetail.setUser(user);
         user.setUserDetail(userDetail);
 
-        return userRepository.save(user);
+        AppUser savedUser = userRepository.save(user);
+        return appUserMapper.toDto(savedUser);
     }
 
     @Override

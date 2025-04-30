@@ -1,5 +1,7 @@
 package com.konnectnet.core.post.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.post.enums.Visibility;
 import jakarta.persistence.*;
@@ -54,10 +56,12 @@ public class Post {
     // Shared Post is a Reference to the Original Post
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "original_post_id")
+    @JsonBackReference
     private Post originalPost;
 
 
     @OneToMany(mappedBy = "originalPost", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Post> sharedPosts = new ArrayList<>();
 
     public Post(String content, Visibility visibility) {
