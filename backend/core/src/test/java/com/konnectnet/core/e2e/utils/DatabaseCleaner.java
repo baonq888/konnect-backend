@@ -30,7 +30,7 @@ public class DatabaseCleaner {
                     FOR r IN (
                         SELECT tablename
                         FROM pg_tables
-                        WHERE schemaname = 'public' 
+                        WHERE schemaname = 'public'
                           AND tablename != 'role'
                     ) LOOP
                         EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' CASCADE';

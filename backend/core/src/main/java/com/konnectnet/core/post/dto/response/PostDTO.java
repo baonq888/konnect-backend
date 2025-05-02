@@ -20,4 +20,6 @@ public class PostDTO {
     private UUID originalPostId;
     private List<PhotoDTO> photoDTOS;
     private List<CommentDTO> commentDTOS;
+    private List<PostLikeDTO> postLikeDTOS;
+    private List<PostShareDTO> postShareDTOS;
 }

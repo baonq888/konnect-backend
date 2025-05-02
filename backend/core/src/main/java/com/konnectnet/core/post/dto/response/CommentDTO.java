@@ -9,11 +9,9 @@ import java.util.UUID;
 @Setter
 @Getter
 public class CommentDTO {
-
     private UUID id;
     private String text;
     private Date createdAt;
     private UUID userId;
     private int likeCount;
-
 }
