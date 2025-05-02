@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,7 @@ import java.io.IOException;
 @RequestMapping("/api/v1/posts")
 @Tag(name = "Posts", description = "Endpoints for managing posts")
 @RequiredArgsConstructor
+@Slf4j
 public class PostController {
 
     private final PostService postService;
@@ -45,7 +47,7 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "Invalid request data")
     })
     @PostMapping
-    public ResponseEntity<Post> createPost(@Valid @RequestBody PostRequest postRequest) {
+    public ResponseEntity<Post> createPost(@RequestBody PostRequest postRequest) {
         try {
             Post post = postService.createPost(postRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(post);

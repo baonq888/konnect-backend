@@ -66,6 +66,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 new ObjectMapper().writeValue(response.getOutputStream(),error);
             }
 
+        } else {
+            log.error("Token is not valid");
         }
         filterChain.doFilter(request, response);
     }

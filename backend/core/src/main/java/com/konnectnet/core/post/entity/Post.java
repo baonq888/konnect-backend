@@ -1,6 +1,7 @@
 package com.konnectnet.core.post.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.post.enums.Visibility;
@@ -29,14 +30,12 @@ public class Post {
     @Temporal(TemporalType.TIMESTAMP)
     private Date uploadDate = new Date();
 
-    private Boolean isPinned = false;
-    private Boolean isEdited = false;
-
     @Enumerated(EnumType.STRING)
     private Visibility visibility = Visibility.PUBLIC;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private AppUser user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)

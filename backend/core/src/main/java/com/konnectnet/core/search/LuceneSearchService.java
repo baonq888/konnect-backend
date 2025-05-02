@@ -51,8 +51,16 @@ public class LuceneSearchService implements SearchService {
                         .build();
 
                 // Search and Pagination
+                if (pageNumber < 1 || pageSize < 1) {
+                    throw new IllegalArgumentException("Page number and page size must be >= 1");
+                }
+
                 int start = (pageNumber - 1) * pageSize;
-                TopDocs results = searcher.search(combinedQuery, start + pageSize);
+                int numHits = start + pageSize;
+                if (numHits <= 0) {
+                    throw new IllegalArgumentException("Invalid pagination parameters: numHits must be > 0");
+                }
+                TopDocs results = searcher.search(combinedQuery, numHits);
                 int end = Math.min(start + pageSize, results.scoreDocs.length);
                 long totalResults = results.totalHits.value;
                 int totalPages = (int) Math.ceil((double) totalResults / pageSize);

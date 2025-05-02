@@ -2,6 +2,7 @@ package com.konnectnet.core.search.index.impl;
 
 import com.konnectnet.core.search.document.DocumentInfo;
 import com.konnectnet.core.search.index.IndexService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
@@ -18,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 
 @Service
+@Slf4j
 public class IndexServiceImpl implements IndexService{
 
     @Value("${search.lucene.dir}")
@@ -50,6 +52,7 @@ public class IndexServiceImpl implements IndexService{
             document.add(new TextField(DocumentField.CONTENT.getFieldName(), content, Field.Store.YES));
             document.add(new TextField(DocumentField.USER.getFieldName(), user, Field.Store.YES));
             writer.updateDocument(new Term(DocumentField.ID.getFieldName(), id), document);
+            log.info("Indexing post: {}", documentInfo);
         }
     }
 
