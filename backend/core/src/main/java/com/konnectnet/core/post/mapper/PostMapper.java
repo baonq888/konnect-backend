@@ -1,8 +1,10 @@
 package com.konnectnet.core.post.mapper;
 
 import com.konnectnet.core.post.dto.response.CommentDTO;
+import com.konnectnet.core.post.dto.response.PhotoDTO;
 import com.konnectnet.core.post.dto.response.PostDTO;
 import com.konnectnet.core.post.entity.Comment;
+import com.konnectnet.core.post.entity.Photo;
 import com.konnectnet.core.post.entity.Post;
 import org.mapstruct.*;
 
@@ -19,5 +21,5 @@ public interface PostMapper {
     })
     PostDTO toPostDTO(Post post);
 
-
+    PhotoDTO toPhotoDTO(Photo photo);
 }

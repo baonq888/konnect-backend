@@ -1,6 +1,8 @@
 package com.konnectnet.core.post.controller;
 
 import com.konnectnet.core.post.dto.request.PostRequest;
+import com.konnectnet.core.post.dto.response.CommentDTO;
+import com.konnectnet.core.post.dto.response.PostDTO;
 import com.konnectnet.core.post.entity.Comment;
 import com.konnectnet.core.post.entity.Post;
 import com.konnectnet.core.post.service.PostService;
@@ -47,9 +49,9 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "Invalid request data")
     })
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody PostRequest postRequest) {
+    public ResponseEntity<PostDTO> createPost(@RequestBody PostRequest postRequest) {
         try {
-            Post post = postService.createPost(postRequest);
+            PostDTO post = postService.createPost(postRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(post);
         } catch (PostException e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -69,10 +71,10 @@ public class PostController {
             @ApiResponse(responseCode = "404", description = "Post not found")
     })
     @GetMapping("/{postId}")
-    public ResponseEntity<Post> getPostById(
+    public ResponseEntity<PostDTO> getPostById(
             @Parameter(description = "The ID of the post to retrieve") @PathVariable String postId) {
         try {
-            Post post = postService.getPostById(postId);
+            PostDTO post = postService.getPostById(postId);
             return ResponseEntity.status(HttpStatus.OK).body(post);
         } catch (PostException e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -92,14 +94,14 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "Invalid search term")
     })
     @GetMapping
-    public ResponseEntity<Page<Post>> searchPosts(
+    public ResponseEntity<Page<PostDTO>> searchPosts(
             @Parameter(description = "Search term for post content") @RequestParam String searchTerm,
             @Parameter(description = "Current page number") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int limit) {
 
         Pageable pageable = PageRequest.of(page, limit);
         try {
-            Page<Post> posts = postService.searchPosts(searchTerm, pageable);
+            Page<PostDTO> posts = postService.searchPosts(searchTerm, pageable);
             return ResponseEntity.status(HttpStatus.OK).body(posts);
         } catch (IOException e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -120,11 +122,11 @@ public class PostController {
             @ApiResponse(responseCode = "404", description = "Post not found")
     })
     @PutMapping("/{postId}")
-    public ResponseEntity<Post> updatePost(
+    public ResponseEntity<PostDTO> updatePost(
             @Parameter(description = "The ID of the post to update") @PathVariable String postId,
             @Valid @RequestBody PostRequest postRequest) {
         try {
-            Post post = postService.updatePost(postId, postRequest);
+            PostDTO post = postService.updatePost(postId, postRequest);
             return ResponseEntity.status(HttpStatus.OK).body(post);
         } catch (PostException e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -202,12 +204,12 @@ public class PostController {
             @ApiResponse(responseCode = "404", description = "Original post or user not found")
     })
     @PostMapping("/{postId}/share")
-    public ResponseEntity<Post> sharePost(
+    public ResponseEntity<PostDTO> sharePost(
             @PathVariable String postId,
             @RequestParam String userId,
             @RequestBody(required = false) String content) {
         try {
-            Post sharedPost = postService.sharePost(postId, userId, content);
+            PostDTO sharedPost = postService.sharePost(postId, userId, content);
             return ResponseEntity.status(HttpStatus.CREATED).body(sharedPost);
         } catch (PostException e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -242,12 +244,12 @@ public class PostController {
             @ApiResponse(responseCode = "404", description = "Post or user not found")
     })
     @PostMapping("/{postId}/comment")
-    public ResponseEntity<Comment> commentOnPost(
+    public ResponseEntity<CommentDTO> commentOnPost(
             @PathVariable String postId,
             @RequestParam String userId,
             @RequestBody String text) {
         try {
-            Comment comment = postService.commentOnPost(postId, userId, text);
+            CommentDTO comment = postService.commentOnPost(postId, userId, text);
             return ResponseEntity.status(HttpStatus.CREATED).body(comment);
         } catch (PostException e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
