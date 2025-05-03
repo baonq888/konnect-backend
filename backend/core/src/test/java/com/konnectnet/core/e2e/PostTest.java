@@ -68,20 +68,20 @@ public class PostTest {
                 .body("id", equalTo(postId));
     }
 
-//    @Test
-//    @Order(3)
-//    void testSearchPosts() {
-//        given()
-//                .header("Authorization", "Bearer " + getAccessToken())
-//                .queryParam("searchTerm", "test")
-//                .queryParam("page", 0)
-//                .queryParam("limit", 10)
-//                .when()
-//                .get("/")
-//                .then()
-//                .statusCode(200)
-//                .body("content", not(empty()));
-//    }
+    @Test
+    @Order(3)
+    void testSearchPosts() {
+        given()
+                .header("Authorization", "Bearer " + getAccessToken())
+                .queryParam("searchTerm", "test")
+                .queryParam("page", 0)
+                .queryParam("limit", 10)
+                .when()
+                .get("/")
+                .then()
+                .statusCode(200)
+                .body("content", not(empty()));
+    }
 
     @Test
     @Order(4)
@@ -119,5 +119,19 @@ public class PostTest {
                 .then()
                 .statusCode(200)
                 .body(equalTo("Post deleted successfully"));
+    }
+
+    @Test
+    @Order(6)
+    void testGetPostByIdAfterLike() {
+        Assumptions.assumeTrue(postId != null);
+
+        given()
+                .header("Authorization", "Bearer " + getAccessToken())
+                .when()
+                .get("/{postId}", postId)
+                .then()
+                .statusCode(200)
+                .body("id", equalTo(postId));
     }
 }

@@ -71,12 +71,12 @@ public class PostServiceImpl implements PostService {
             Post savedPost = postRepository.save(post);
 
             // Index Post document to Lucence
-//            DocumentInfo documentInfo = new DocumentInfo(
-//                    savedPost.getId().toString(),
-//                    savedPost.getContent(),
-//                    savedPost.getUser().getName()
-//            );
-//            indexService.indexDocument(documentInfo);
+            DocumentInfo documentInfo = new DocumentInfo(
+                    savedPost.getId().toString(),
+                    savedPost.getContent(),
+                    savedPost.getUser().getName()
+            );
+            indexService.indexDocument(documentInfo);
 
             return postMapper.toPostDTO(savedPost);
         } catch (IllegalArgumentException e) {

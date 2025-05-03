@@ -54,6 +54,18 @@ public class AppUser {
     )
     private Collection<AppUser> friends = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_following",
+            joinColumns = @JoinColumn(name = "follower_id"),
+            inverseJoinColumns = @JoinColumn(name = "following_id")
+    )
+    private Collection<AppUser> following = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "following")
+    private Collection<AppUser> followers = new ArrayList<>();
+
+
 
     public AppUser(String name, String email, String password) {
         this.name = name;
