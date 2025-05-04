@@ -190,8 +190,6 @@ public class PostServiceImpl implements PostService {
             post.getLikedUsers().remove(user);
             postRepository.save(post);
         }
-
-
     }
 
     @Override

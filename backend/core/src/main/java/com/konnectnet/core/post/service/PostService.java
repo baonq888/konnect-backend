@@ -3,8 +3,6 @@ package com.konnectnet.core.post.service;
 import com.konnectnet.core.post.dto.request.PostRequest;
 import com.konnectnet.core.post.dto.response.CommentDTO;
 import com.konnectnet.core.post.dto.response.PostDTO;
-import com.konnectnet.core.post.entity.Comment;
-import com.konnectnet.core.post.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

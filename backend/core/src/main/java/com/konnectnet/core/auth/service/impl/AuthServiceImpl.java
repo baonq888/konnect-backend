@@ -9,6 +9,7 @@ import com.konnectnet.core.auth.mapper.AppUserMapper;
 import com.konnectnet.core.auth.repository.RoleRepository;
 import com.konnectnet.core.auth.repository.UserRepository;
 import com.konnectnet.core.auth.service.AuthService;
+import com.konnectnet.core.infrastructure.security.AppUserDetails;
 import com.konnectnet.core.user.entity.UserDetail;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,21 +37,13 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<AppUser> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isEmpty()) {
-            log.error("user not found");
-            throw new UsernameNotFoundException("user not found");
-        }
-        AppUser user = userOptional.get();
-        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        user.getRoles().forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
-        });
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                authorities
-        );
+        AppUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error("User not found with email: {}", email);
+                    return new UsernameNotFoundException("User not found");
+                });
+
+        return new AppUserDetails(user);
     }
 
     @Override

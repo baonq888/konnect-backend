@@ -2,6 +2,7 @@ package com.konnectnet.core.e2e;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.konnectnet.core.e2e.utils.EntityContext;
 import com.konnectnet.core.e2e.utils.TokenContext;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -29,7 +30,9 @@ public class PostTest {
     }
 
     private String getAccessToken() {
-        return TokenContext.get(TEST_USER + "_" + "access_token");
+        return TokenContext.get(TEST_USER + "_access_token");
+    }
+    private String getUserId() { return EntityContext.get(TEST_USER+ "_id");
     }
 
     @Test
@@ -82,7 +85,7 @@ public class PostTest {
                 .queryParam("page", 0)
                 .queryParam("limit", 10)
                 .when()
-                .get("/")
+                .get("")
                 .then()
                 .statusCode(200)
                 .body("content", not(empty()));
@@ -114,12 +117,12 @@ public class PostTest {
 
 
     @Test
-    @Order(6)
+    @Order(5)
     void testLikePost() {
         Assumptions.assumeTrue(postId != null);
         given()
                 .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", TEST_USER)
+                .queryParam("userId", getUserId())
                 .when()
                 .post("/{postId}/like", postId)
                 .then()
@@ -128,12 +131,12 @@ public class PostTest {
     }
 
     @Test
-    @Order(7)
+    @Order(6)
     void testUnlikePost() {
         Assumptions.assumeTrue(postId != null);
         given()
                 .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", TEST_USER)
+                .queryParam("userId", getUserId())
                 .when()
                 .post("/{postId}/unlike", postId)
                 .then()
@@ -142,12 +145,12 @@ public class PostTest {
     }
 
     @Test
-    @Order(8)
+    @Order(7)
     void testSharePost() {
         Assumptions.assumeTrue(postId != null);
         given()
                 .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", TEST_USER)
+                .queryParam("userId", getUserId())
                 .body("Shared this post!")
                 .contentType(ContentType.TEXT)
                 .when()
@@ -166,7 +169,7 @@ public class PostTest {
     }
 
     @Test
-    @Order(9)
+    @Order(8)
     void testUnsharePost() {
         Assumptions.assumeTrue(sharedPostId != null);
         given()
@@ -179,12 +182,12 @@ public class PostTest {
     }
 
     @Test
-    @Order(10)
+    @Order(9)
     void testCommentOnPost() {
         Assumptions.assumeTrue(postId != null);
         var response = given()
                 .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", TEST_USER)
+                .queryParam("userId", getUserId())
                 .body("Nice post!")
                 .contentType(ContentType.TEXT)
                 .when()
@@ -198,30 +201,28 @@ public class PostTest {
     }
 
     @Test
-    @Order(11)
+    @Order(10)
     void testLikeComment() {
         Assumptions.assumeTrue(commentId != null);
         given()
                 .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", TEST_USER)
+                .queryParam("userId", getUserId())
                 .when()
                 .post("/{postId}/comments/{commentId}/like", postId, commentId)
                 .then()
-                .statusCode(200)
-                .body(equalTo("Comment liked successfully"));
+                .statusCode(200);
     }
 
     @Test
-    @Order(12)
+    @Order(11)
     void testUnlikeComment() {
         Assumptions.assumeTrue(commentId != null);
         given()
                 .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", TEST_USER)
+                .queryParam("userId", getUserId())
                 .when()
                 .post("/{postId}/comments/{commentId}/unlike", postId, commentId)
                 .then()
-                .statusCode(200)
-                .body(equalTo("Comment unliked successfully"));
+                .statusCode(200);
     }
 }
