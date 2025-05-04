@@ -2,7 +2,10 @@ package com.konnectnet.core.friend.service.impl;
 
 import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.auth.repository.UserRepository;
+import com.konnectnet.core.friend.entity.FriendRequest;
+import com.konnectnet.core.friend.enums.FriendRequestStatus;
 import com.konnectnet.core.friend.exception.FriendException;
+import com.konnectnet.core.friend.repository.FriendRequestRepository;
 import com.konnectnet.core.friend.service.FriendService;
 import com.konnectnet.core.user.dto.response.UserDetailDTO;
 import com.konnectnet.core.user.mapper.UserMapper;
@@ -25,73 +28,86 @@ import java.util.UUID;
 public class FriendServiceImpl implements FriendService {
 
     private final UserRepository userRepository;
+    private final FriendRequestRepository friendRequestRepository;
     private final UserMapper userMapper;
 
     @Override
     @Transactional
-    public void addFriend(UUID userId, UUID friendId) {
-        try {
-            if (userId.equals(friendId)) {
-                throw new IllegalArgumentException("User cannot add themselves as a friend");
-            }
-
-            AppUser user = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
-            AppUser friend = userRepository.findById(friendId)
-                    .orElseThrow(() -> new IllegalArgumentException("Friend not found"));
-
-            user.getFriends().add(friend);
-            friend.getFriends().add(user);
-
-            userRepository.save(user);
-            userRepository.save(friend);
-        } catch (Exception e) {
-            log.error("Error occurred while adding friend: {}", e.getMessage(), e);
-            throw new FriendException("Failed to add friend", e);
+    public void sendFriendRequest(UUID senderId, UUID receiverId) {
+        if (senderId.equals(receiverId)) {
+            throw new IllegalArgumentException("Cannot send friend request to yourself");
         }
 
+        AppUser sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new EntityNotFoundException("Sender not found"));
+        AppUser receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new EntityNotFoundException("Receiver not found"));
+
+        friendRequestRepository.findBySenderAndReceiver(sender, receiver).ifPresent(existing -> {
+            throw new FriendException("Friend request already sent");
+        });
+
+        FriendRequest request = new FriendRequest();
+        request.setSender(sender);
+        request.setReceiver(receiver);
+        request.setStatus(FriendRequestStatus.PENDING);
+        friendRequestRepository.save(request);
+    }
+
+    @Override
+    @Transactional
+    public void acceptFriendRequest(UUID receiverId, UUID senderId) {
+        AppUser sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new EntityNotFoundException("Sender not found"));
+        AppUser receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new EntityNotFoundException("Receiver not found"));
+
+        FriendRequest request = friendRequestRepository.findBySenderAndReceiver(sender, receiver)
+                .orElseThrow(() -> new FriendException("Friend request not found"));
+
+        if (request.getStatus() != FriendRequestStatus.PENDING) {
+            throw new FriendException("Friend request already handled");
+        }
+
+        request.setStatus(FriendRequestStatus.ACCEPTED);
+        friendRequestRepository.save(request);
+
+        sender.getFriends().add(receiver);
+        receiver.getFriends().add(sender);
+
+        userRepository.save(sender);
+        userRepository.save(receiver);
     }
 
     @Override
     @Transactional
     public void unfriend(UUID userId, UUID friendId) {
-        try {
-            AppUser user = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
-            AppUser friend = userRepository.findById(friendId)
-                    .orElseThrow(() -> new IllegalArgumentException("Friend not found"));
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        AppUser friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new EntityNotFoundException("Friend not found"));
 
-            user.getFriends().remove(friend);
-            friend.getFriends().remove(user);
+        user.getFriends().remove(friend);
+        friend.getFriends().remove(user);
 
-            userRepository.save(user);
-            userRepository.save(friend);
-        } catch (Exception e) {
-            log.error("Error occurred while removing friend: {}", e.getMessage(), e);
-            throw new FriendException("Failed to remove friend", e);
-        }
-
+        userRepository.save(user);
+        userRepository.save(friend);
     }
 
     @Override
     public Page<UserDetailDTO> getFriends(UUID userId, Pageable pageable) {
-        try {
-            AppUser user = userRepository.findById(userId)
-                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-            List<AppUser> friends = new ArrayList<>(user.getFriends());
+        List<AppUser> friends = new ArrayList<>(user.getFriends());
 
-            int start = (int) pageable.getOffset();
-            int end = Math.min((start + pageable.getPageSize()), friends.size());
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), friends.size());
 
-            List<UserDetailDTO> friendDTOs = friends.subList(start, end).stream()
-                    .map(userMapper::toUserDetailDTO)
-                    .toList();
+        List<UserDetailDTO> friendDTOs = friends.subList(start, end).stream()
+                .map(userMapper::toUserDetailDTO)
+                .toList();
 
-            return new PageImpl<>(friendDTOs, pageable, friends.size());
-        } catch (Exception e) {
-            log.error("Error occurred while getting friends: {}", e.getMessage(), e);
-            throw new FriendException("Failed to get friends", e);
-        }
+        return new PageImpl<>(friendDTOs, pageable, friends.size());
     }
 }

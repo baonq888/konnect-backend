@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/follow")
+@RequestMapping("/api/v1/profile/follows")
 @Tag(name = "Follow", description = "Endpoints to manage user follow relationships")
 @RequiredArgsConstructor
 public class FollowController {
@@ -54,7 +54,8 @@ public class FollowController {
     })
     @GetMapping("/followers")
     public ResponseEntity<List<AppUser>> getFollowers(@RequestParam UUID userId) {
-        return ResponseEntity.ok(followService.getFollowers(userId));
+        List<AppUser> followers = followService.getFollowers(userId);
+        return ResponseEntity.ok(followers);
     }
 
     @Operation(summary = "Get following", description = "Retrieve list of users the specified user is following")
@@ -64,6 +65,7 @@ public class FollowController {
     })
     @GetMapping("/following")
     public ResponseEntity<List<AppUser>> getFollowing(@RequestParam UUID userId) {
-        return ResponseEntity.ok(followService.getFollowing(userId));
+        List<AppUser> followings = followService.getFollowing(userId);
+        return ResponseEntity.ok(followings);
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import java.io.IOException;
 
 public interface PostService {
-    PostDTO createPost(PostRequest request);
+    PostDTO createPost(PostRequest request) throws IOException;
     PostDTO getPostById(String postId);
     Page<PostDTO> searchPosts(String searchTerm, Pageable pageable) throws IOException;
     PostDTO updatePost(String postId, PostRequest request);
@@ -21,6 +21,6 @@ public interface PostService {
     PostDTO sharePost(String postId, String userId, String userContent);
     void unsharePost(String sharedPostId);
     CommentDTO commentOnPost(String postId, String userId, String text);
-    void likeComment(String commentId, String userId);
-    void unlikeComment(String commentId, String userId);
+    void likeComment(String postId, String commentId, String userId);
+    void unlikeComment(String postId, String commentId, String userId);
 }

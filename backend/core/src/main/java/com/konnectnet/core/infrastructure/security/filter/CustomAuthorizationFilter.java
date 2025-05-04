@@ -69,6 +69,5 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         } else {
             log.error("Token is not valid");
         }
-        filterChain.doFilter(request, response);
     }
 }

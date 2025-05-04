@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/friends")
+@RequestMapping("/api/v1/profile/friends")
 @Tag(name = "Friend", description = "Endpoints to manage friend relationships")
 @RequiredArgsConstructor
 public class FriendController {
@@ -22,19 +22,35 @@ public class FriendController {
     private final FriendService friendService;
 
     @Operation(
-            summary = "Add a friend",
-            description = "Adds another user as a friend"
+            summary = "Send a friend request",
+            description = "Sends a friend request to another user"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Friend added successfully"),
+            @ApiResponse(responseCode = "200", description = "Friend request sent successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid user or friend ID")
     })
-    @PostMapping
-    public ResponseEntity<String> addFriend(
-            @RequestParam UUID userId,
-            @RequestParam UUID friendId) {
-        friendService.addFriend(userId, friendId);
-        return ResponseEntity.ok("Friend added successfully");
+    @PostMapping("/request")
+    public ResponseEntity<String> sendFriendRequest(
+            @RequestParam UUID senderId,
+            @RequestParam UUID receiverId) {
+        friendService.sendFriendRequest(senderId, receiverId);
+        return ResponseEntity.ok("Friend request sent successfully");
+    }
+
+    @Operation(
+            summary = "Accept a friend request",
+            description = "Accepts a friend request from another user"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Friend request accepted successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid user or friend ID")
+    })
+    @PostMapping("/accept")
+    public ResponseEntity<String> acceptFriendRequest(
+            @RequestParam UUID receiverId,
+            @RequestParam UUID senderId) {
+        friendService.acceptFriendRequest(receiverId, senderId);
+        return ResponseEntity.ok("Friend request accepted successfully");
     }
 
     @Operation(

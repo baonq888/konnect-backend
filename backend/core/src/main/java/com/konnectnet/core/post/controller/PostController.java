@@ -49,7 +49,7 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "Invalid request data")
     })
     @PostMapping
-    public ResponseEntity<PostDTO> createPost(@RequestBody PostRequest postRequest) {
+    public ResponseEntity<PostDTO> createPost(@RequestBody PostRequest postRequest) throws IOException {
         try {
             PostDTO post = postService.createPost(postRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(post);
@@ -243,7 +243,7 @@ public class PostController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),
             @ApiResponse(responseCode = "404", description = "Post or user not found")
     })
-    @PostMapping("/{postId}/comment")
+    @PostMapping("/{postId}/comments")
     public ResponseEntity<CommentDTO> commentOnPost(
             @PathVariable String postId,
             @RequestParam String userId,
@@ -264,12 +264,13 @@ public class PostController {
             @ApiResponse(responseCode = "200", description = "Comment liked successfully"),
             @ApiResponse(responseCode = "404", description = "Comment or user not found")
     })
-    @PostMapping("/comments/{commentId}/like")
+    @PostMapping("/{postId}/comments/{commentId}/like")
     public ResponseEntity<String> likeComment(
+            @PathVariable String postId,
             @PathVariable String commentId,
             @RequestParam String userId) {
         try {
-            postService.likeComment(commentId, userId);
+            postService.likeComment(postId, commentId, userId);
             return ResponseEntity.ok("Comment liked successfully");
         } catch (PostException e) {
             return new ResponseEntity<>("Failed to like comment", HttpStatus.NOT_FOUND);
@@ -285,12 +286,13 @@ public class PostController {
             @ApiResponse(responseCode = "200", description = "Comment unliked successfully"),
             @ApiResponse(responseCode = "404", description = "Comment or user not found")
     })
-    @PostMapping("/comments/{commentId}/unlike")
+    @PostMapping("{postId}/comments/{commentId}/unlike")
     public ResponseEntity<String> unlikeComment(
+            @PathVariable String postId,
             @PathVariable String commentId,
             @RequestParam String userId) {
         try {
-            postService.unlikeComment(commentId, userId);
+            postService.unlikeComment(postId, commentId, userId);
             return ResponseEntity.ok("Comment unliked successfully");
         } catch (PostException e) {
             return new ResponseEntity<>("Failed to unlike comment", HttpStatus.NOT_FOUND);

@@ -23,71 +23,51 @@ public class FollowServiceImpl implements FollowService {
     @Override
     @Transactional
     public void followUser(UUID followerId, UUID followeeId) {
-        try {
-            AppUser follower = userRepository.findById(followerId)
-                    .orElseThrow(() -> new RuntimeException("Follower not found"));
 
-            AppUser followee = userRepository.findById(followeeId)
-                    .orElseThrow(() -> new RuntimeException("User to follow not found"));
+        AppUser follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new RuntimeException("Follower not found"));
 
-            follower.getFollowing().add(followee);
-            followee.getFollowers().add(follower);
+        AppUser followee = userRepository.findById(followeeId)
+                .orElseThrow(() -> new RuntimeException("User to follow not found"));
 
-            userRepository.save(follower);
-            userRepository.save(followee);
-        } catch (Exception e) {
-            log.error("Error occurred while following user: {}", e.getMessage(), e);
-            throw new FollowException("Failed to follow user", e);
-        }
+        follower.getFollowing().add(followee);
+        followee.getFollowers().add(follower);
+
+        userRepository.save(follower);
+        userRepository.save(followee);
+
 
     }
 
     @Override
     @Transactional
     public void unfollowUser(UUID followerId, UUID followeeId) {
-        try {
-            AppUser follower = userRepository.findById(followerId)
-                    .orElseThrow(() -> new RuntimeException("Follower not found"));
+        AppUser follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new RuntimeException("Follower not found"));
 
-            AppUser followee = userRepository.findById(followeeId)
-                    .orElseThrow(() -> new RuntimeException("User to unfollow not found"));
+        AppUser followee = userRepository.findById(followeeId)
+                .orElseThrow(() -> new RuntimeException("User to unfollow not found"));
 
-            follower.getFollowing().remove(followee);
-            followee.getFollowers().remove(follower);
+        follower.getFollowing().remove(followee);
+        followee.getFollowers().remove(follower);
 
-            userRepository.save(follower);
-            userRepository.save(followee);
-        } catch (Exception e) {
-            log.error("Error occurred while unfollowing user: {}", e.getMessage(), e);
-            throw new FollowException("Failed to unfollow user", e);
-        }
-
+        userRepository.save(follower);
+        userRepository.save(followee);
     }
 
     @Override
     public List<AppUser> getFollowers(UUID userId) {
-        try {
-            AppUser user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-            return List.copyOf(user.getFollowers());
-        } catch (Exception e) {
-            log.error("Error occurred while getting followers: {}", e.getMessage(), e);
-            throw new FollowException("Failed to get followers", e);
-        }
-
+        return List.copyOf(user.getFollowers());
     }
 
     @Override
     public List<AppUser> getFollowing(UUID userId) {
-        try {
-            AppUser user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-            return List.copyOf(user.getFollowing());
-        } catch (Exception e) {
-            log.error("Error occurred while getting followings: {}", e.getMessage(), e);
-            throw new FollowException("Failed to get followings", e);        }
-
+        return List.copyOf(user.getFollowing());
     }
 }

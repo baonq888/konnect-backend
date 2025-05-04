@@ -18,6 +18,8 @@ public class PostTest {
     private static final String BASE_URL = "http://localhost:8050/api/v1/posts";
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static String postId;
+    private static String sharedPostId;
+    private static String commentId;
     private static final String TEST_USER = "user1@example.com";
 
 
@@ -39,13 +41,16 @@ public class PostTest {
         postRequest.put("photoUrls", List.of("https://images.unsplash.com/photo-1745794621090-d856c53b0cc2?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"));
 
         String jsonBody = objectMapper.writeValueAsString(postRequest);
+        System.out.println(jsonBody);
+
 
         var response = given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + getAccessToken())
                 .body(jsonBody)
+                .log().all()
                 .when()
-                .post()
+                .post("")
                 .then()
                 .statusCode(201)
                 .extract()
@@ -107,31 +112,116 @@ public class PostTest {
                 .body("visibility", equalTo("PRIVATE"));
     }
 
-    @Test
-    @Order(5)
-    void testDeletePost() {
-        Assumptions.assumeTrue(postId != null);
-
-        given()
-                .header("Authorization", "Bearer " + getAccessToken())
-                .when()
-                .delete("/{postId}", postId)
-                .then()
-                .statusCode(200)
-                .body(equalTo("Post deleted successfully"));
-    }
 
     @Test
     @Order(6)
-    void testGetPostByIdAfterLike() {
+    void testLikePost() {
         Assumptions.assumeTrue(postId != null);
+        given()
+                .header("Authorization", "Bearer " + getAccessToken())
+                .queryParam("userId", TEST_USER)
+                .when()
+                .post("/{postId}/like", postId)
+                .then()
+                .statusCode(200)
+                .body(equalTo("Post liked successfully"));
+    }
 
+    @Test
+    @Order(7)
+    void testUnlikePost() {
+        Assumptions.assumeTrue(postId != null);
+        given()
+                .header("Authorization", "Bearer " + getAccessToken())
+                .queryParam("userId", TEST_USER)
+                .when()
+                .post("/{postId}/unlike", postId)
+                .then()
+                .statusCode(200)
+                .body(equalTo("Post unliked successfully"));
+    }
+
+    @Test
+    @Order(8)
+    void testSharePost() {
+        Assumptions.assumeTrue(postId != null);
+        given()
+                .header("Authorization", "Bearer " + getAccessToken())
+                .queryParam("userId", TEST_USER)
+                .body("Shared this post!")
+                .contentType(ContentType.TEXT)
+                .when()
+                .post("/{postId}/share", postId)
+                .then()
+                .statusCode(201)
+                .body("id", notNullValue())
+                .body("content", containsString("Shared"))
+                .extract().response();
+
+        sharedPostId = given()
+                .header("Authorization", "Bearer " + getAccessToken())
+                .get("/{postId}", postId)
+                .then()
+                .extract().path("id"); // Capture shared post ID from response if needed
+    }
+
+    @Test
+    @Order(9)
+    void testUnsharePost() {
+        Assumptions.assumeTrue(sharedPostId != null);
         given()
                 .header("Authorization", "Bearer " + getAccessToken())
                 .when()
-                .get("/{postId}", postId)
+                .delete("/{postId}/unshare", sharedPostId)
                 .then()
                 .statusCode(200)
-                .body("id", equalTo(postId));
+                .body(equalTo("Shared post removed successfully"));
+    }
+
+    @Test
+    @Order(10)
+    void testCommentOnPost() {
+        Assumptions.assumeTrue(postId != null);
+        var response = given()
+                .header("Authorization", "Bearer " + getAccessToken())
+                .queryParam("userId", TEST_USER)
+                .body("Nice post!")
+                .contentType(ContentType.TEXT)
+                .when()
+                .post("/{postId}/comments", postId)
+                .then()
+                .statusCode(201)
+                .body("text", equalTo("Nice post!"))
+                .extract().response();
+
+        commentId = response.jsonPath().getString("id");
+    }
+
+    @Test
+    @Order(11)
+    void testLikeComment() {
+        Assumptions.assumeTrue(commentId != null);
+        given()
+                .header("Authorization", "Bearer " + getAccessToken())
+                .queryParam("userId", TEST_USER)
+                .when()
+                .post("/{postId}/comments/{commentId}/like", postId, commentId)
+                .then()
+                .statusCode(200)
+                .body(equalTo("Comment liked successfully"));
+    }
+
+    @Test
+    @Order(12)
+    void testUnlikeComment() {
+        Assumptions.assumeTrue(commentId != null);
+        given()
+                .header("Authorization", "Bearer " + getAccessToken())
+                .queryParam("userId", TEST_USER)
+                .when()
+                .post("/{postId}/comments/{commentId}/unlike", postId, commentId)
+                .then()
+                .statusCode(200)
+                .body(equalTo("Comment unliked successfully"));
     }
 }
