@@ -1,12 +1,15 @@
 package com.konnectnet.core.auth.service.impl;
 
 import com.konnectnet.core.auth.dto.request.RegisterRequest;
+import com.konnectnet.core.auth.dto.response.AppUserDTO;
 import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.auth.entity.Role;
 import com.konnectnet.core.auth.enums.RoleEnum;
+import com.konnectnet.core.auth.mapper.AppUserMapper;
 import com.konnectnet.core.auth.repository.RoleRepository;
 import com.konnectnet.core.auth.repository.UserRepository;
 import com.konnectnet.core.auth.service.AuthService;
+import com.konnectnet.core.infrastructure.security.AppUserDetails;
 import com.konnectnet.core.user.entity.UserDetail;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,30 +32,23 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AppUserMapper appUserMapper;
 
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<AppUser> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isEmpty()) {
-            log.error("user not found");
-            throw new UsernameNotFoundException("user not found");
-        }
-        AppUser user = userOptional.get();
-        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        user.getRoles().forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
-        });
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                authorities
-        );
+        AppUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error("User not found with email: {}", email);
+                    return new UsernameNotFoundException("User not found");
+                });
+
+        return new AppUserDetails(user);
     }
 
     @Override
     @Transactional
-    public AppUser saveUser(RegisterRequest request) {
+    public AppUserDTO saveUser(RegisterRequest request) {
         AppUser user = new AppUser(request.getName(), request.getEmail(), request.getPassword());
         Role userRole = roleRepository.findByName(RoleEnum.USER.name())
                 .orElseThrow(() -> new RuntimeException("Role not found"));
@@ -63,7 +59,8 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         userDetail.setUser(user);
         user.setUserDetail(userDetail);
 
-        return userRepository.save(user);
+        AppUser savedUser = userRepository.save(user);
+        return appUserMapper.toDto(savedUser);
     }
 
     @Override

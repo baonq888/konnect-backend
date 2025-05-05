@@ -35,7 +35,6 @@ public class JwtUtil {
     }
 
     public boolean isTokenValid(String token) {
-
         try {
             decodeToken(token);
             return true;

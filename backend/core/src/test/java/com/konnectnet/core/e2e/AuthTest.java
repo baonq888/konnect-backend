@@ -1,7 +1,10 @@
 package com.konnectnet.core.e2e;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.konnectnet.core.e2e.utils.EntityContext;
 import com.konnectnet.core.e2e.utils.TokenContext;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -108,6 +111,9 @@ public class AuthTest {
 
             TokenContext.add( user.email + "_" + "access_token", accessToken);
             TokenContext.add(user.email + "_" +"refresh_token", refreshToken);
+
+            DecodedJWT jwt = JWT.decode(accessToken);
+            EntityContext.add(user.email+"_id", jwt.getClaim("user_id").asString());
         }
     }
 

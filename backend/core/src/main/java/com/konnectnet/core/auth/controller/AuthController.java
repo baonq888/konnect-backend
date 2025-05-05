@@ -2,6 +2,7 @@ package com.konnectnet.core.auth.controller;
 
 import com.konnectnet.core.auth.dto.request.LoginRequest;
 import com.konnectnet.core.auth.dto.request.RegisterRequest;
+import com.konnectnet.core.auth.dto.response.AppUserDTO;
 import com.konnectnet.core.auth.dto.response.LoginResponse;
 import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.auth.entity.Role;
@@ -65,7 +66,7 @@ public class AuthController {
             summary = "Register a new user",
             description = "Creates a new user with the provided credentials")
     @PostMapping("/register")
-    public ResponseEntity<AppUser> saveUser(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AppUserDTO> saveUser(@RequestBody RegisterRequest request) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/v1/auth/register").toUriString());
         return ResponseEntity.created(uri).body(userService.saveUser(request));
     }

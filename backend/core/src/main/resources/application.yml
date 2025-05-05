@@ -30,6 +30,7 @@ logging:
     org.springframework.security.messaging: DEBUG
     org.springframework.web.socket.messaging: DEBUG
     org.springframework.messaging.simp: DEBUG
+    org.springframework.web: DEBUG
 
 search:
   engine: lucene

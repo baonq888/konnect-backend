@@ -1,5 +1,6 @@
 package com.konnectnet.core.auth.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.konnectnet.core.auth.enums.AuthProvider;
 import com.konnectnet.core.user.entity.UserDetail;
 import jakarta.persistence.Entity;
@@ -42,7 +43,29 @@ public class AppUser {
             mappedBy = "user",
             cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private UserDetail userDetail;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_friends",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_id")
+    )
+    private Collection<AppUser> friends = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_following",
+            joinColumns = @JoinColumn(name = "follower_id"),
+            inverseJoinColumns = @JoinColumn(name = "following_id")
+    )
+    private Collection<AppUser> following = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "following")
+    private Collection<AppUser> followers = new ArrayList<>();
+
+
 
     public AppUser(String name, String email, String password) {
         this.name = name;
