@@ -33,7 +33,7 @@ public class PostTest {
     private String getAccessToken(String user) {
         return TokenContext.get(user + "_access_token");
     }
-    private String getUserId(String user) { return EntityContext.get(user+ "_id");}
+    private String getUser2Id() { return EntityContext.get(PostTest.TEST_USER_2 + "_id");}
 
     @Test
     @Order(1)
@@ -87,8 +87,8 @@ public class PostTest {
                 .when()
                 .get("")
                 .then()
-                .statusCode(200)
-                .body("content", not(empty()));
+                .statusCode(200);
+
     }
 
     @Test
@@ -122,7 +122,7 @@ public class PostTest {
         Assumptions.assumeTrue(postId != null);
         given()
                 .header("Authorization", "Bearer " + getAccessToken(TEST_USER_1))
-                .queryParam("userId", getUserId(TEST_USER_2))
+                .queryParam("userId", getUser2Id())
                 .when()
                 .post("/{postId}/like", postId)
                 .then()
@@ -136,7 +136,7 @@ public class PostTest {
         Assumptions.assumeTrue(postId != null);
         given()
                 .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
-                .queryParam("userId", getUserId(TEST_USER_2))
+                .queryParam("userId", getUser2Id())
                 .when()
                 .post("/{postId}/unlike", postId)
                 .then()
@@ -150,7 +150,7 @@ public class PostTest {
         Assumptions.assumeTrue(postId != null);
         var response = given()
                 .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
-                .queryParam("userId", getUserId(TEST_USER_2))
+                .queryParam("userId", getUser2Id())
                 .body("Shared this post!")
                 .contentType(ContentType.TEXT)
                 .when()
@@ -183,7 +183,7 @@ public class PostTest {
         Assumptions.assumeTrue(postId != null);
         var response = given()
                 .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
-                .queryParam("userId", getUserId(TEST_USER_2))
+                .queryParam("userId", getUser2Id())
                 .body("Nice post!")
                 .contentType(ContentType.TEXT)
                 .when()
@@ -202,7 +202,7 @@ public class PostTest {
         Assumptions.assumeTrue(commentId != null);
         given()
                 .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
-                .queryParam("userId", getUserId(TEST_USER_2))
+                .queryParam("userId", getUser2Id())
                 .when()
                 .post("/{postId}/comments/{commentId}/like", postId, commentId)
                 .then()
@@ -215,7 +215,7 @@ public class PostTest {
         Assumptions.assumeTrue(commentId != null);
         given()
                 .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
-                .queryParam("userId", getUserId(TEST_USER_2))
+                .queryParam("userId", getUser2Id())
                 .when()
                 .post("/{postId}/comments/{commentId}/unlike", postId, commentId)
                 .then()

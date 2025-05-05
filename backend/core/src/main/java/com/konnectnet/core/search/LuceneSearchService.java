@@ -39,6 +39,11 @@ public class LuceneSearchService implements SearchService {
         try (DirectoryReader reader = DirectoryReader.open(indexService.getDirectory())) {
             IndexSearcher searcher = new IndexSearcher(reader);
 
+            if (pageNumber < 0 || pageSize < 1) {
+                throw new IllegalArgumentException("Page number must be >= 0 and page size must be >= 1");
+            }
+            int page = pageNumber + 1;
+
             try {
                 // Build queries
                 Query contentQuery = new QueryParser(DocumentField.CONTENT.getFieldName(), new StandardAnalyzer()).parse(searchTerm);
@@ -51,11 +56,7 @@ public class LuceneSearchService implements SearchService {
                         .build();
 
                 // Search and Pagination
-                if (pageNumber < 1 || pageSize < 1) {
-                    throw new IllegalArgumentException("Page number and page size must be >= 1");
-                }
-
-                int start = (pageNumber - 1) * pageSize;
+                int start = (page - 1) * pageSize;
                 int numHits = start + pageSize;
                 if (numHits <= 0) {
                     throw new IllegalArgumentException("Invalid pagination parameters: numHits must be > 0");

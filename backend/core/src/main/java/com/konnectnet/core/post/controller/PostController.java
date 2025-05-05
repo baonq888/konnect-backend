@@ -50,12 +50,10 @@ public class PostController {
     })
     @PostMapping
     public ResponseEntity<PostDTO> createPost(@RequestBody PostRequest postRequest) throws IOException {
-        try {
-            PostDTO post = postService.createPost(postRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(post);
-        } catch (PostException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+
+        PostDTO post = postService.createPost(postRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(post);
+
     }
 
     @Operation(
@@ -73,12 +71,10 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostDTO> getPostById(
             @Parameter(description = "The ID of the post to retrieve") @PathVariable String postId) {
-        try {
-            PostDTO post = postService.getPostById(postId);
-            return ResponseEntity.status(HttpStatus.OK).body(post);
-        } catch (PostException e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
+
+        PostDTO post = postService.getPostById(postId);
+        return ResponseEntity.status(HttpStatus.OK).body(post);
+
     }
 
     @Operation(
@@ -97,15 +93,11 @@ public class PostController {
     public ResponseEntity<Page<PostDTO>> searchPosts(
             @Parameter(description = "Search term for post content") @RequestParam String searchTerm,
             @Parameter(description = "Current page number") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int limit) {
+            @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int limit) throws IOException {
 
         Pageable pageable = PageRequest.of(page, limit);
-        try {
-            Page<PostDTO> posts = postService.searchPosts(searchTerm, pageable);
-            return ResponseEntity.status(HttpStatus.OK).body(posts);
-        } catch (IOException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+        Page<PostDTO> posts = postService.searchPosts(searchTerm, pageable);
+        return ResponseEntity.ok(posts);
     }
 
     @Operation(
@@ -125,12 +117,10 @@ public class PostController {
     public ResponseEntity<PostDTO> updatePost(
             @Parameter(description = "The ID of the post to update") @PathVariable String postId,
             @Valid @RequestBody PostRequest postRequest) {
-        try {
-            PostDTO post = postService.updatePost(postId, postRequest);
-            return ResponseEntity.status(HttpStatus.OK).body(post);
-        } catch (PostException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+
+        PostDTO post = postService.updatePost(postId, postRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(post);
+
     }
 
     @Operation(
@@ -147,12 +137,10 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<String> deletePost(
             @Parameter(description = "The ID of the post to delete") @PathVariable String postId) {
-        try {
-            postService.deletePost(postId);
-            return ResponseEntity.status(HttpStatus.OK).body("Post deleted successfully");
-        } catch (PostException e) {
-            return new ResponseEntity<>("Failed to delete post", HttpStatus.NOT_FOUND);
-        }
+
+        postService.deletePost(postId);
+        return ResponseEntity.status(HttpStatus.OK).body("Post deleted successfully");
+
     }
 
     @Operation(
@@ -167,12 +155,10 @@ public class PostController {
     public ResponseEntity<String> likePost(
             @PathVariable String postId,
             @RequestParam String userId) {
-        try {
-            postService.likePost(postId, userId);
-            return ResponseEntity.ok("Post liked successfully");
-        } catch (PostException e) {
-            return new ResponseEntity<>("Failed to like post", HttpStatus.NOT_FOUND);
-        }
+
+        postService.likePost(postId, userId);
+        return ResponseEntity.ok("Post liked successfully");
+
     }
 
     @Operation(
@@ -187,12 +173,10 @@ public class PostController {
     public ResponseEntity<String> unlikePost(
             @PathVariable String postId,
             @RequestParam String userId) {
-        try {
-            postService.unlikePost(postId, userId);
-            return ResponseEntity.ok("Post unliked successfully");
-        } catch (PostException e) {
-            return new ResponseEntity<>("Failed to unlike post", HttpStatus.NOT_FOUND);
-        }
+
+        postService.unlikePost(postId, userId);
+        return ResponseEntity.ok("Post unliked successfully");
+
     }
 
     @Operation(
@@ -208,12 +192,10 @@ public class PostController {
             @PathVariable String postId,
             @RequestParam String userId,
             @RequestBody(required = false) String content) {
-        try {
-            PostDTO sharedPost = postService.sharePost(postId, userId, content);
-            return ResponseEntity.status(HttpStatus.CREATED).body(sharedPost);
-        } catch (PostException e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
+
+        PostDTO sharedPost = postService.sharePost(postId, userId, content);
+        return ResponseEntity.status(HttpStatus.CREATED).body(sharedPost);
+
     }
 
     @Operation(
@@ -226,12 +208,10 @@ public class PostController {
     })
     @DeleteMapping("/{postId}/unshare")
     public ResponseEntity<String> unsharePost(@PathVariable String postId) {
-        try {
-            postService.unsharePost(postId);
-            return ResponseEntity.ok("Shared post removed successfully");
-        } catch (PostException e) {
-            return new ResponseEntity<>("Failed to unshare post", HttpStatus.NOT_FOUND);
-        }
+
+        postService.unsharePost(postId);
+        return ResponseEntity.ok("Shared post removed successfully");
+
     }
 
     @Operation(
@@ -248,12 +228,10 @@ public class PostController {
             @PathVariable String postId,
             @RequestParam String userId,
             @RequestBody String text) {
-        try {
-            CommentDTO comment = postService.commentOnPost(postId, userId, text);
-            return ResponseEntity.status(HttpStatus.CREATED).body(comment);
-        } catch (PostException e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
+
+        CommentDTO comment = postService.commentOnPost(postId, userId, text);
+        return ResponseEntity.status(HttpStatus.CREATED).body(comment);
+
     }
 
     @Operation(
@@ -269,12 +247,10 @@ public class PostController {
             @PathVariable String postId,
             @PathVariable String commentId,
             @RequestParam String userId) {
-        try {
-            postService.likeComment(postId, commentId, userId);
-            return ResponseEntity.ok("Comment liked successfully");
-        } catch (PostException e) {
-            return new ResponseEntity<>("Failed to like comment", HttpStatus.NOT_FOUND);
-        }
+
+        postService.likeComment(postId, commentId, userId);
+        return ResponseEntity.ok("Comment liked successfully");
+
 
     }
 
@@ -291,11 +267,9 @@ public class PostController {
             @PathVariable String postId,
             @PathVariable String commentId,
             @RequestParam String userId) {
-        try {
-            postService.unlikeComment(postId, commentId, userId);
-            return ResponseEntity.ok("Comment unliked successfully");
-        } catch (PostException e) {
-            return new ResponseEntity<>("Failed to unlike comment", HttpStatus.NOT_FOUND);
-        }
+
+        postService.unlikeComment(postId, commentId, userId);
+        return ResponseEntity.ok("Comment unliked successfully");
+
     }
 }
