@@ -1,13 +1,10 @@
 package com.konnectnet.core.infrastructure.security.filter;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.konnectnet.core.auth.dto.request.LoginRequest;
 import com.konnectnet.core.auth.dto.response.LoginResponse;
 import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.infrastructure.security.AppUserDetails;
-import com.konnectnet.core.infrastructure.security.enums.JwtSecret;
 import com.konnectnet.core.infrastructure.security.jwt.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import java.io.IOException;
 import java.util.Date;
@@ -55,14 +51,10 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
         AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
         AppUser user = userDetails.getAppUser();
-        Algorithm algorithm = Algorithm.HMAC256(JwtSecret.SECRET_KEY.getKey().getBytes());
-        String access_token = jwtProvider.generateToken(user, request);
 
-        String refresh_token = JWT.create()
-                .withSubject(user.getEmail())
-                .withExpiresAt(new Date(System.currentTimeMillis()+30*60*1000))
-                .withIssuer(request.getRequestURL().toString())
-                .sign(algorithm);
+        String access_token = jwtProvider.generateAccessToken(user, request);
+        String refresh_token = jwtProvider.generateRefreshToken(user, request);
+
         response.setHeader("access_token",access_token);
         response.setHeader("refresh_token",refresh_token);
         response.setContentType(APPLICATION_JSON_VALUE);

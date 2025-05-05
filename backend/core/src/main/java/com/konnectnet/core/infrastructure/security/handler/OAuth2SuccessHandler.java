@@ -30,7 +30,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         AppUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-         String token = jwtTokenProvider.generateToken(user, request);
+         String token = jwtTokenProvider.generateAccessToken(user, request);
 
          response.sendRedirect("/login/success?token=" + token);
     }

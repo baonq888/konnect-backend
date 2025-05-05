@@ -113,7 +113,7 @@ public class AuthTest {
             TokenContext.add(user.email + "_" +"refresh_token", refreshToken);
 
             DecodedJWT jwt = JWT.decode(accessToken);
-            EntityContext.add(user.email+"_id", jwt.getSubject());
+            EntityContext.add(user.email+"_id", jwt.getClaim("user_id").asString());
         }
     }
 

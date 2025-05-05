@@ -21,7 +21,8 @@ public class PostTest {
     private static String postId;
     private static String sharedPostId;
     private static String commentId;
-    private static final String TEST_USER = "user1@example.com";
+    private static final String TEST_USER_1 = "user1@example.com";
+    private static final String TEST_USER_2 = "user2@example.com";
 
 
     @BeforeAll
@@ -29,11 +30,10 @@ public class PostTest {
         RestAssured.baseURI = BASE_URL;
     }
 
-    private String getAccessToken() {
-        return TokenContext.get(TEST_USER + "_access_token");
+    private String getAccessToken(String user) {
+        return TokenContext.get(user + "_access_token");
     }
-    private String getUserId() { return EntityContext.get(TEST_USER+ "_id");
-    }
+    private String getUserId(String user) { return EntityContext.get(user+ "_id");}
 
     @Test
     @Order(1)
@@ -49,7 +49,7 @@ public class PostTest {
 
         var response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + getAccessToken())
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_1))
                 .body(jsonBody)
                 .log().all()
                 .when()
@@ -68,7 +68,7 @@ public class PostTest {
         Assumptions.assumeTrue(postId != null);
 
         given()
-                .header("Authorization", "Bearer " + getAccessToken())
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_1))
                 .when()
                 .get("/{postId}", postId)
                 .then()
@@ -80,7 +80,7 @@ public class PostTest {
     @Order(3)
     void testSearchPosts() {
         given()
-                .header("Authorization", "Bearer " + getAccessToken())
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_1))
                 .queryParam("searchTerm", "test")
                 .queryParam("page", 0)
                 .queryParam("limit", 10)
@@ -105,7 +105,7 @@ public class PostTest {
 
         given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + getAccessToken())
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_1))
                 .body(jsonBody)
                 .when()
                 .put("/{postId}", postId)
@@ -121,8 +121,8 @@ public class PostTest {
     void testLikePost() {
         Assumptions.assumeTrue(postId != null);
         given()
-                .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", getUserId())
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_1))
+                .queryParam("userId", getUserId(TEST_USER_2))
                 .when()
                 .post("/{postId}/like", postId)
                 .then()
@@ -135,8 +135,8 @@ public class PostTest {
     void testUnlikePost() {
         Assumptions.assumeTrue(postId != null);
         given()
-                .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", getUserId())
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
+                .queryParam("userId", getUserId(TEST_USER_2))
                 .when()
                 .post("/{postId}/unlike", postId)
                 .then()
@@ -148,9 +148,9 @@ public class PostTest {
     @Order(7)
     void testSharePost() {
         Assumptions.assumeTrue(postId != null);
-        given()
-                .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", getUserId())
+        var response = given()
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
+                .queryParam("userId", getUserId(TEST_USER_2))
                 .body("Shared this post!")
                 .contentType(ContentType.TEXT)
                 .when()
@@ -161,11 +161,7 @@ public class PostTest {
                 .body("content", containsString("Shared"))
                 .extract().response();
 
-        sharedPostId = given()
-                .header("Authorization", "Bearer " + getAccessToken())
-                .get("/{postId}", postId)
-                .then()
-                .extract().path("id"); // Capture shared post ID from response if needed
+        sharedPostId = response.jsonPath().getString("id");
     }
 
     @Test
@@ -173,7 +169,7 @@ public class PostTest {
     void testUnsharePost() {
         Assumptions.assumeTrue(sharedPostId != null);
         given()
-                .header("Authorization", "Bearer " + getAccessToken())
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
                 .when()
                 .delete("/{postId}/unshare", sharedPostId)
                 .then()
@@ -186,8 +182,8 @@ public class PostTest {
     void testCommentOnPost() {
         Assumptions.assumeTrue(postId != null);
         var response = given()
-                .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", getUserId())
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
+                .queryParam("userId", getUserId(TEST_USER_2))
                 .body("Nice post!")
                 .contentType(ContentType.TEXT)
                 .when()
@@ -205,8 +201,8 @@ public class PostTest {
     void testLikeComment() {
         Assumptions.assumeTrue(commentId != null);
         given()
-                .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", getUserId())
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
+                .queryParam("userId", getUserId(TEST_USER_2))
                 .when()
                 .post("/{postId}/comments/{commentId}/like", postId, commentId)
                 .then()
@@ -218,8 +214,8 @@ public class PostTest {
     void testUnlikeComment() {
         Assumptions.assumeTrue(commentId != null);
         given()
-                .header("Authorization", "Bearer " + getAccessToken())
-                .queryParam("userId", getUserId())
+                .header("Authorization", "Bearer " + getAccessToken(TEST_USER_2))
+                .queryParam("userId", getUserId(TEST_USER_2))
                 .when()
                 .post("/{postId}/comments/{commentId}/unlike", postId, commentId)
                 .then()

@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 public class JwtProvider {
 
     private final String secret = JwtSecret.SECRET_KEY.getKey();
-    Algorithm algorithm = Algorithm.HMAC256(secret.getBytes());
+    private final Algorithm algorithm = Algorithm.HMAC256(secret.getBytes());
 
 
-    public String generateToken(AppUser appUser, HttpServletRequest request) {
+    public String generateAccessToken(AppUser appUser, HttpServletRequest request) {
         long expiry = 10 * 60 * 1000;
         return JWT.create()
                 .withSubject(appUser.getEmail())
@@ -28,6 +28,15 @@ public class JwtProvider {
                 .withClaim("roles", appUser.getRoles().stream()
                         .map(Role::getName)
                         .collect(Collectors.toList()))
+                .sign(algorithm);
+    }
+
+    public String generateRefreshToken(AppUser appUser, HttpServletRequest request) {
+        long expiry = 30 * 60 * 1000;
+        return JWT.create()
+                .withSubject(appUser.getEmail())
+                .withExpiresAt(new Date(System.currentTimeMillis()+expiry))
+                .withIssuer(request.getRequestURL().toString())
                 .sign(algorithm);
     }
 }
