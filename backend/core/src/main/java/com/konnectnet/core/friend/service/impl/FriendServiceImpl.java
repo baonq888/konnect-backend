@@ -72,8 +72,16 @@ public class FriendServiceImpl implements FriendService {
         request.setStatus(FriendRequestStatus.ACCEPTED);
         friendRequestRepository.save(request);
 
+        // Add each other as friends
         sender.getFriends().add(receiver);
         receiver.getFriends().add(sender);
+
+        // Follow each other
+        sender.getFollowing().add(receiver);
+        receiver.getFollowers().add(sender);
+
+        receiver.getFollowing().add(sender);
+        sender.getFollowers().add(receiver);
 
         userRepository.save(sender);
         userRepository.save(receiver);
@@ -87,8 +95,17 @@ public class FriendServiceImpl implements FriendService {
         AppUser friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new EntityNotFoundException("Friend not found"));
 
+        // Remove from friends list
         user.getFriends().remove(friend);
         friend.getFriends().remove(user);
+
+        // Remove follow relationships
+        user.getFollowing().remove(friend);
+        friend.getFollowers().remove(user);
+
+        friend.getFollowing().remove(user);
+        user.getFollowers().remove(friend);
+
 
         userRepository.save(user);
         userRepository.save(friend);
