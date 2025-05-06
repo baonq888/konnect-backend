@@ -2,6 +2,7 @@ package com.konnectnet.core.notification.service.impl;
 
 import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.auth.repository.UserRepository;
+import com.konnectnet.core.notification.config.WebSocketDestinations;
 import com.konnectnet.core.notification.dto.NotificationDTO;
 import com.konnectnet.core.notification.entity.Notification;
 import com.konnectnet.core.notification.enums.NotificationType;
@@ -12,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -23,6 +25,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final NotificationMapper notificationMapper;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public void sendNotification(NotificationDTO dto) {
@@ -41,6 +44,12 @@ public class NotificationServiceImpl implements NotificationService {
                 .type(NotificationType.valueOf(String.valueOf(dto.getType())))
                 .read(false)
                 .build();
+
+        messagingTemplate.convertAndSendToUser(
+                dto.getRecipientId(),
+                WebSocketDestinations.USER_NOTIFICATION_QUEUE.getDestination(),
+                dto
+        );
 
         notificationRepository.save(notification);
     }

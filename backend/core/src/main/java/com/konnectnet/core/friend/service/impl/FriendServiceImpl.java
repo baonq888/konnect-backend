@@ -4,9 +4,12 @@ import com.konnectnet.core.auth.entity.AppUser;
 import com.konnectnet.core.auth.repository.UserRepository;
 import com.konnectnet.core.friend.entity.FriendRequest;
 import com.konnectnet.core.friend.enums.FriendRequestStatus;
+import com.konnectnet.core.friend.event.FriendRequestEvent;
 import com.konnectnet.core.friend.exception.FriendException;
+import com.konnectnet.core.friend.kafka.FriendNotificationProducer;
 import com.konnectnet.core.friend.repository.FriendRequestRepository;
 import com.konnectnet.core.friend.service.FriendService;
+import com.konnectnet.core.notification.enums.NotificationType;
 import com.konnectnet.core.user.dto.response.UserDetailDTO;
 import com.konnectnet.core.user.mapper.UserMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,6 +33,7 @@ public class FriendServiceImpl implements FriendService {
     private final UserRepository userRepository;
     private final FriendRequestRepository friendRequestRepository;
     private final UserMapper userMapper;
+    private final FriendNotificationProducer friendNotificationProducer;
 
     @Override
     @Transactional
@@ -51,6 +55,17 @@ public class FriendServiceImpl implements FriendService {
         request.setSender(sender);
         request.setReceiver(receiver);
         request.setStatus(FriendRequestStatus.PENDING);
+
+        FriendRequestEvent event = FriendRequestEvent.builder()
+                .type(NotificationType.FRIEND_REQUEST_SENT)
+                .content(sender.getName() + " sent you a friend request")
+                .senderId(senderId.toString())
+                .senderName(sender.getName())
+                .recipientId(receiverId.toString())
+                .build();
+        friendNotificationProducer.sendNotification(event);
+
+
         friendRequestRepository.save(request);
     }
 
@@ -82,6 +97,16 @@ public class FriendServiceImpl implements FriendService {
 
         receiver.getFollowing().add(sender);
         sender.getFollowers().add(receiver);
+
+
+        FriendRequestEvent event = FriendRequestEvent.builder()
+                .type(NotificationType.FRIEND_REQUEST_ACCEPTED)
+                .content(sender.getName() + " accepted your friend request")
+                .senderId(receiverId.toString())
+                .senderName(receiver.getName())
+                .recipientId(senderId.toString())
+                .build();
+        friendNotificationProducer.sendNotification(event);
 
         userRepository.save(sender);
         userRepository.save(receiver);
