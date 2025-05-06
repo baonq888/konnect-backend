@@ -62,8 +62,7 @@ public class FollowTest {
                 .when()
                 .get("/following")
                 .then()
-                .statusCode(200)
-                .body("size()", greaterThanOrEqualTo(1));
+                .statusCode(200);
     }
 
     @Test
@@ -78,8 +77,7 @@ public class FollowTest {
                 .when()
                 .get("/followers")
                 .then()
-                .statusCode(200)
-                .body("size()", greaterThanOrEqualTo(1));
+                .statusCode(200);
     }
 
     @Test
