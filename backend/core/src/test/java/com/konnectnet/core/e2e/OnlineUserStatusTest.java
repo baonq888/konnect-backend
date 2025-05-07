@@ -44,10 +44,6 @@ public class OnlineUserStatusTest {
 
         WebSocketStompClient stompClient = new WebSocketStompClient(new StandardWebSocketClient());
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
-//        List<Transport> transports = new ArrayList<>();
-//        transports.add(new WebSocketTransport(new StandardWebSocketClient()));
-//        WebSocketClient transport = new SockJsClient(transports);
-//        WebSocketStompClient stompClient = new WebSocketStompClient(transport);
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
