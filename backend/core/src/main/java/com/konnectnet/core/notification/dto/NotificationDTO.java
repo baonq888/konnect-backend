@@ -3,7 +3,7 @@ package com.konnectnet.core.notification.dto;
 import com.konnectnet.core.notification.enums.NotificationType;
 import lombok.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,5 +18,5 @@ public class NotificationDTO {
     private String senderId;
     private String recipientId;
     private boolean isRead;
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 }

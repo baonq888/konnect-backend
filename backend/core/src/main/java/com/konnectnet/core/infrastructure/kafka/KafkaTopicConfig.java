@@ -11,6 +11,8 @@ public class KafkaTopicConfig {
     public NewTopic friendRequestTopic() {
         return TopicBuilder
                 .name(KafkaTopics.FRIEND_REQUEST.getTopicName())
+                .partitions(1)
+                .replicas(1)
                 .build();
     }
 

@@ -1,9 +1,7 @@
 package com.konnectnet.core.notification.kafka;
 
 import com.konnectnet.core.friend.event.FriendRequestEvent;
-import com.konnectnet.core.infrastructure.kafka.KafkaTopics;
 import com.konnectnet.core.notification.dto.NotificationDTO;
-import com.konnectnet.core.notification.enums.NotificationType;
 import com.konnectnet.core.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +9,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -29,7 +28,7 @@ public class NotificationConsumer {
                 .senderName(event.getSenderName())
                 .senderId(event.getSenderId())
                 .recipientId(event.getRecipientId())
-                .createdAt(Instant.now())
+                .createdAt(LocalDateTime.now())
                 .isRead(false)
                 .build();
 

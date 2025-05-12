@@ -45,7 +45,7 @@ public class FriendTest {
         StompSession stompSessionUser1 = connectAndSubscribe(stompClient, TEST_USER_1, messageQueueUser1);
         StompSession stompSessionUser2 = connectAndSubscribe(stompClient, TEST_USER_2, messageQueueUser2);
 
-        Thread.sleep(1000); // Wait for subscriptions to be active
+        Thread.sleep(500);
     }
 
     private static StompSession connectAndSubscribe(WebSocketStompClient stompClient, String userEmail, BlockingQueue<String> queue) throws Exception {
@@ -82,8 +82,6 @@ public class FriendTest {
     @Test
     @Order(1)
     void sendFriendRequest() throws Exception {
-        Thread.sleep(500);
-
         given()
                 .header("Authorization", "Bearer " + getAccessToken(TEST_USER_1))
                 .contentType(ContentType.JSON)
