@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,11 +35,12 @@ public class FeedController {
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
     @GetMapping
-    public Page<Feed> getUserFeed(
+    public ResponseEntity<Page<Feed>> getUserFeed(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit
     ) {
         Pageable pageable = PageRequest.of(page, limit);
-        return feedService.getUserFeed(pageable);
+        Page<Feed> feeds = feedService.getUserFeed(pageable);
+        return ResponseEntity.ok(feeds);
     }
 }
