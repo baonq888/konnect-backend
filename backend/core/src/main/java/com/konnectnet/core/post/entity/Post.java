@@ -28,7 +28,7 @@ public class Post {
     private String content;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date uploadDate = new Date();
+    private Date createdAt = new Date();
 
     @Enumerated(EnumType.STRING)
     private Visibility visibility = Visibility.PUBLIC;
