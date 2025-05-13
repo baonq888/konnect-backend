@@ -1,10 +1,8 @@
 package com.konnectnet.core.infrastructure.kafka;
 
-import lombok.Getter;
-
-@Getter
 public enum KafkaTopics {
-    FRIEND_REQUEST("friend-request-topic");
+    FRIEND_REQUEST("friend-request-topic"),
+    FEED_EVENT("new-post-topic");  // Add this line
 
     private final String topicName;
 
@@ -12,4 +10,7 @@ public enum KafkaTopics {
         this.topicName = topicName;
     }
 
+    public String getTopicName() {
+        return topicName;
+    }
 }

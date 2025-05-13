@@ -68,7 +68,6 @@ public class PostServiceImpl implements PostService {
         post.setUser(user);
 
         Post savedPost = postRepository.save(post);
-        System.out.println("Before "+savedPost.getContent());
 
         // Index Post document to Lucence
         DocumentInfo documentInfo = new DocumentInfo(

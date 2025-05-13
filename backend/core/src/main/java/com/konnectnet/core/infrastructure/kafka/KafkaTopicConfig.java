@@ -16,5 +16,14 @@ public class KafkaTopicConfig {
                 .build();
     }
 
+    @Bean
+    public NewTopic feedEventTopic() {
+        return TopicBuilder
+                .name(KafkaTopics.FEED_EVENT.getTopicName())
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
+
 }
 
