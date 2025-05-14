@@ -1,5 +1,6 @@
 package com.konnectnet.core.auth.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.konnectnet.core.auth.enums.AuthProvider;
 import com.konnectnet.core.user.entity.UserDetail;
@@ -61,9 +62,6 @@ public class AppUser {
             inverseJoinColumns = @JoinColumn(name = "following_id")
     )
     private Collection<AppUser> following = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "following")
-    private Collection<AppUser> followers = new ArrayList<>();
 
 
 

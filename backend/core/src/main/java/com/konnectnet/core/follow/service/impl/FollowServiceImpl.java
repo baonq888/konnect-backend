@@ -31,7 +31,6 @@ public class FollowServiceImpl implements FollowService {
                 .orElseThrow(() -> new RuntimeException("User to follow not found"));
 
         follower.getFollowing().add(followee);
-        followee.getFollowers().add(follower);
 
         userRepository.save(follower);
         userRepository.save(followee);
@@ -49,7 +48,6 @@ public class FollowServiceImpl implements FollowService {
                 .orElseThrow(() -> new RuntimeException("User to unfollow not found"));
 
         follower.getFollowing().remove(followee);
-        followee.getFollowers().remove(follower);
 
         userRepository.save(follower);
         userRepository.save(followee);
@@ -57,10 +55,10 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public List<AppUser> getFollowers(UUID userId) {
-        AppUser user = userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return List.copyOf(user.getFollowers());
+        return userRepository.findFollowersByUserId(userId);
     }
 
     @Override

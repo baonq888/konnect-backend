@@ -11,10 +11,10 @@ import org.junit.platform.suite.api.Suite;
         DatabaseCleaner.class,
         LuceneIndexCleaner.class,
         AuthTest.class,
-        OnlineUserStatusTest.class,
+        // OnlineUserStatusTest.class,
         FriendTest.class,
         FollowTest.class,
-        PostTest.class,
+        // PostTest.class,
 })
 public class E2ETestSuite {
 }

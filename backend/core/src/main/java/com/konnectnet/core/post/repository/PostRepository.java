@@ -11,12 +11,16 @@ import java.util.UUID;
 
 public interface PostRepository extends JpaRepository<Post, UUID> {
 
-    @Query("""
-        SELECT p FROM Post p
-        WHERE p.user.id IN (
-            SELECT f.followed.id FROM Follow f WHERE f.follower.id = :userId
-        )
-        ORDER BY p.createdAt DESC
-    """)
+    @Query(
+        """
+            SELECT p FROM Post p
+            WHERE p.user.id IN (
+                SELECT u2.id FROM AppUser u1
+                JOIN u1.following u2
+                WHERE u1.id = :userId
+            )
+            ORDER BY p.createdAt DESC
+        """
+    )
     Page<Post> findRecentPostsFromFollowedUsers(@Param("userId") UUID userId, Pageable pageable);
 }
