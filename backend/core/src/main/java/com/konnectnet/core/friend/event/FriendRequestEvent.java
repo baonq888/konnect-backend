@@ -10,7 +10,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FriendRequestEvent implements Serializable {
-    private NotificationType type;
+    private String type;
     private String content;
     private String senderName;
     private String senderId;

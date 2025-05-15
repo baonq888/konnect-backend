@@ -57,7 +57,7 @@ public class FriendServiceImpl implements FriendService {
         request.setStatus(FriendRequestStatus.PENDING);
 
         FriendRequestEvent event = FriendRequestEvent.builder()
-                .type(NotificationType.FRIEND_REQUEST_SENT)
+                .type(String.valueOf(NotificationType.FRIEND_REQUEST_SENT))
                 .content(sender.getName() + " sent you a friend request")
                 .senderId(senderId.toString())
                 .senderName(sender.getName())
@@ -93,14 +93,12 @@ public class FriendServiceImpl implements FriendService {
 
         // Follow each other
         sender.getFollowing().add(receiver);
-        receiver.getFollowers().add(sender);
 
         receiver.getFollowing().add(sender);
-        sender.getFollowers().add(receiver);
 
 
         FriendRequestEvent event = FriendRequestEvent.builder()
-                .type(NotificationType.FRIEND_REQUEST_ACCEPTED)
+                .type(String.valueOf(NotificationType.FRIEND_REQUEST_ACCEPTED))
                 .content(sender.getName() + " accepted your friend request")
                 .senderId(receiverId.toString())
                 .senderName(receiver.getName())
@@ -126,10 +124,8 @@ public class FriendServiceImpl implements FriendService {
 
         // Remove follow relationships
         user.getFollowing().remove(friend);
-        friend.getFollowers().remove(user);
 
         friend.getFollowing().remove(user);
-        user.getFollowers().remove(friend);
 
 
         userRepository.save(user);

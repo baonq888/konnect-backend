@@ -2,6 +2,7 @@ package com.konnectnet.core.notification.kafka;
 
 import com.konnectnet.core.friend.event.FriendRequestEvent;
 import com.konnectnet.core.notification.dto.NotificationDTO;
+import com.konnectnet.core.notification.enums.NotificationType;
 import com.konnectnet.core.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ public class NotificationConsumer {
     public void handleFriendRequestEvent(FriendRequestEvent event) {
         log.info("Received FriendRequestEvent: {}", event);
         NotificationDTO notification = NotificationDTO.builder()
-                .type(event.getType())
+                .type(NotificationType.valueOf(event.getType()))
                 .content(event.getContent())
                 .senderName(event.getSenderName())
                 .senderId(event.getSenderId())
